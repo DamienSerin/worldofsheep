@@ -20,63 +20,93 @@ var map = [
 ['W','W','W','W','W','W','W','W','W','W']
 ];
 
-var userInputs = {};
+var userInputs = [];
 
 function newConnection(socket) {
 	var playerId = nextPlayerId++;
 	environment.players[playerId] = {
 		position: {x: 50, y:50}, 
-		direction: {up: false, down: false, left: false, right: false},
-		speed: 1,
+		direction: {x: 0, y: 0},
+		speed: 2,
 		score: 0
 	};
 
 	socket.emit('init', {playerId: playerId, environment: environment, map: map});
 
 	socket.on('input', function(userInput){
-
+		userInputs.push({playerId: playerId, userInput: userInput.key});
+		userInputs.forEach(processInput);
+		updateEnvironment();
+		io.emit('updateEnvironment', environment);
 	});
 }
 
 function updatePlayer(player) {
-	//player.x += player.direction.x * player.speed;
-	//player.y += player.direction.y * player.speed;
+		//console.log("hello updatePlayer--------");
+		//console.log(player);
+		player.position.x += player.direction.x * player.speed;
+		player.position.y += player.direction.y * player.speed;
+		//console.log("---------- ");
 }
 
 function updateEnvironment() {
 	//environment.players.forEach(updatePlayer);
 	var players = environment.players;
-	for(var player in players){
-		if(players.hasOwnProperty(player)){
-			updatePlayer(player);
-		}
+
+	//Object.keys(environment.players).forEach(updatePlayer);
+	for(var key in environment.players){
+		var player = environment.players[key];
+		updatePlayer(player);
 	}
 	//resolveColisions();
 }
 
-function processInput(input){
-	var player = environment.players[input.clientId];
-	switch(input.cmd) {
+function processInput(input, index){
+	var player = environment.players[input.playerId];
+	console.log("x : " + player.direction.x);
+	console.log("y : " + player.direction.y);
+
+	switch(input.userInput) {
 		case 'UP_PRESSED':
-			player.direction.y -=1;
+			player.direction.y = -1;
 			break;
 		case 'UP_RELEASED':
-			player.direction.y +=1;
+			player.direction.y = 0;
+			break;
+		case 'DOWN_PRESSED':
+			player.direction.y = 1;
+			break;
+		case 'DOWN_RELEASED':
+			player.direction.y = 0;
+			break;
+		case 'LEFT_PRESSED':
+			player.direction.x = -1;
+			break;
+		case 'LEFT_RELEASED':
+			player.direction.x = 0;
+			break;
+		case 'RIGHT_PRESSED':
+			player.direction.x = 1;
+			break;
+		case 'RIGHT_RELEASED':
+			player.direction.x = 0;
+			break;
+		default:
 			break;
 	}
+	userInputs.splice(index, 1);
+	//console.log(player);
+	//console.log("----");
+	//console.log(environment.players);
 }
 
-function gameLoop() {
-	for(var input in userInputs){
-		if(userInputs.hasOwnProperty(input)){
-			processInput(input);
-		}
-	}
-	//userInputs.forEach(processInput);
+/*function gameLoop() {
+	userInputs.forEach(processInput);
+	//console.log(environment.players);
 	updateEnvironment();
 	io.emit('updateEnvironment', environment);
-}
-setInterval(gameLoop, 1000/30);
+}*/
+//setInterval(gameLoop, 1000/1000);
 
 io.on('connection', newConnection);
 
