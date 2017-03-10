@@ -2,8 +2,16 @@
 var $ = require("jquery");
 var socket = require('socket.io-client')();
 
-var canvas = document.getElementById('canvas');
-var ctx = canvas.getContext('2d');
+var canvasbg = document.getElementById('canvasbg');
+var canvasfg = document.getElementById('canvasfg');
+var ctxbg = canvasbg.getContext('2d');
+var ctxfg = canvasfg.getContext('2d');
+
+/* Canvas for pre-rendering */
+var tmp_canvas = document.createElement('canvas');
+var tmp_ctx = tmp_canvas.getContext('2d');
+tmp_canvas.width = 1000;
+tmp_canvas.height = 600;
 
 var environment = {
 	players: {},
@@ -17,9 +25,8 @@ var myPlayerId = -1;
 socket.on('init', function(init){
 	myPlayerId = init.playerId;
 	environment = init.environment;
-	map = init.map;
-	drawMap(map);
-	
+	//map = init.map;
+	environment.walls.forEach(drawWall);
 });
 
 socket.on('updateEnvironment', function(newEnvironment){
@@ -67,26 +74,31 @@ $(document).on('keyup', function(event){
 
 function drawPlayer(playerId) {
 	var player = environment.players[playerId];
-	ctx.beginPath();
-	ctx.rect(player.position.x, player.position.y, 20, 20);
-	ctx.fillStyle = "green";
-	ctx.fill();
+	
+	/* pre rendering */
+	tmp_ctx.beginPath();
+	tmp_ctx.rect(player.position.x, player.position.y, player.hitbox.width, player.hitbox.height);
+	tmp_ctx.fillStyle = "green";
+	tmp_ctx.fill();
 }
 
 function drawElement(x, y, width, height, color){
-	//ctx.drawImage(img,10,10);
-	//changer variable "color" par path de l'image à afficher
-	//ctx.beginPath();
+	ctxbg.beginPath();
+	ctxbg.rect(x, y, width, height);
+	ctxbg.fillStyle = color;
+	ctxbg.fill();
+	
+	/* Pour afficher une image à la place de la couleur pas belle */ 
+	
+	/*
 	var img = new Image();
 	img.onload = function () {
-	    ctx.drawImage(img, x, y);
+	    ctxbg.drawImage(img, x, y);
 	}
 	img.src = color;
-	//ctx.rect(x, y, width, height);
-	//ctx.fillStyle = color;
-	//ctx.fill();
+	*/
 }
-
+/*
 function drawMap(map){
 	var x = 0;
 	var y = 0;
@@ -96,26 +108,32 @@ function drawMap(map){
 	        switch(line[j]){
 	        	case 'W':
 	        		j <= 0 ? x = 0 : x +=100;
-	        		drawElement(x, y, 100, 60, 'Tile.png');
+	        		drawElement(x, y, 100, 60, 'grey');
 		    		break;
 		    	default:
 		    		j <= 0 ? x = 0 : x +=100;
-		    		drawElement(x, y, 100, 60, 'BGTile.png');
+		    		//drawElement(x, y, 100, 60, 'BGTile.png');
 	        }
 	    }
 	    x = 0;
 	    y += 60;
 	}
 }
-
+*/
 function drawObject(object){
 
 }
 
+function drawWall(wall){
+	drawElement(wall.position.x, wall.position.y, wall.hitbox.height, wall.hitbox.width, "grey");
+}
+
 function renderLoop(){
-	drawMap(map);
+	tmp_ctx.clearRect(0, 0, tmp_canvas.width, tmp_canvas.height);
+	ctxfg.clearRect(0, 0, canvasfg.width, canvasfg.height);
+
 	Object.keys(environment.players).forEach(drawPlayer);
-	//environment.objects.forEach(drawObject);
+	ctxfg.drawImage(tmp_canvas, 0, 0);	
 	window.requestAnimationFrame(renderLoop);
 }
 },{"jquery":33,"socket.io-client":40}],2:[function(require,module,exports){
