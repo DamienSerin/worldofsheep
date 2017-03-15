@@ -9,16 +9,23 @@ var nextPlayerId = 1;
 var environment = {
 	players: {},
 	objects: [],
+	shots: [],
 	walls: []
 };
 
 var map = [
-['W','W','W','W','W','W','W','W','W','W'],
-['W','','','','','','','','','W'],
-['W','','','W','','W','','','','W'],
-['W','','','','W','','','','','W'],
-['W','','','','','','','','','W'],
-['W','W','W','W','W','W','W','W','W','W']
+['W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W'],
+['W','','','','','','','','','W','W','','','','','','','','','W'],
+['W','','','W','','W','','','','W','W','','','','','','','','','W'],
+['W','','','','W','','','','','W','W','','','','','','','','','W'],
+['W','','','','','','','','','W','W','','','','','','','','','W'],
+['W','','','','','','','','','','','','','','','','','','','W'],
+['W','','','W','','W','','','','','','','','','','','','','','W'],
+['W','','','','W','','','','','W','W','','','','','','','','','W'],
+['W','','','','','','','','','W','W','','','','','','','','','W'],
+['W','','','','W','','','','','W','W','','','','','','','','','W'],
+['W','','','','','','','','','W','W','','','','','','','','','W'],
+['W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W']
 ];
 
 var userInputs = [];
@@ -30,76 +37,90 @@ function newConnection(socket) {
 		position: {x: 200, y:200}, 
 		direction: {x: 0, y: 0},
 		hitbox: {width: 20, height: 20},
-		speed: 2,
+		speed: 0.5,
 		score: 0
 	};
 
+	/* créer les éléments statiques de la map */ 
 	createMap(map);
+
+	/* initialisation du jeu */
 	socket.emit('init', {playerId: playerId, environment: environment});
 
+	/* à la réception d'une commande */
 	socket.on('input', function(userInput){
 		userInputs.push({playerId: playerId, userInput: userInput.key});
-		userInputs.forEach(processInput);
-		updateEnvironment();
-		io.emit('updateEnvironment', environment);
 	});
+
+	socket.on('shoot', function(shoot){
+		environment.shots.push(shoot);
+	});
+
+	/* supprime le joueur de l'environment lors de sa déco */
+	socket.on('disconnect', function(){
+		delete environment.players[playerId];
+	});
+
 }
 
+/* met à jour un joueur */
 function updatePlayer(player) {
-		//console.log("hello updatePlayer--------");
-		//console.log(player);
+		"use strict";
+
 		var walls = environment.walls;
+		var players = environment.players;
+		
+		var oldx = player.position.x;
+		var oldy = player.position.y;
 
-		/*for(var wall in environment.walls){
-			console.log("wall : " + wall);
+		/* update de la position du joueur */
+		player.position.x += player.direction.x * player.speed;
+		player.position.y += player.direction.y * player.speed;
 
+		/* check les collisions avec les murs */
+		for(let wall of walls){
 			if(collide(wall, player)){
-				return;
-			}
-		}*/
-		var index, len;
-		for (index = 0, len = walls.length; index < len; ++index) {
-			var tmp = walls[index];
-			console.log(tmp);
-			console.log("---");
-		    if(collide(tmp, player)){
+				/* si colision retour à l'ancienne position */
+				player.position.x = oldx;
+				player.position.y = oldy;
 		    	return;
 		    }
 		}
 
+		/* check les collisions entre joueurs */
 		for(var playr in environment.players){
-			if(collide(playr, player) && playr.playerId != player.playerId){
+			if(collide(environment.players[playr], player) && environment.players[playr].playerId != player.playerId){
+				/* si colision retour à l'ancienne position */
+				player.position.x = oldx;
+				player.position.y = oldy;
 				return;
 			}
 		}
-
-		player.position.x += player.direction.x * player.speed;
-		player.position.y += player.direction.y * player.speed;
-
-		//console.log("---------- ");
 }
 
+function updateShot(shot){
+	shot.position.x += shot.direct.dirx * 0.8;
+	shot.position.y += shot.direct.diry * 0.8;	
+}
+
+/* met à jour l'environment */
 function updateEnvironment() {
 	var players = environment.players;
 	for(var key in environment.players){
 		var player = environment.players[key];
 		updatePlayer(player);
 	}
+	environment.shots.forEach(updateShot);
 	//resolveColisions();
 }
 
+/* check si l'objet en argument est en collision avec le joueur */
 function collide(obj1, player){
-	//console.log(player);
-
-	//console.log("obj : " + obj1);
-	//console.log("pos : " + obj1.position.x);
 	return obj1.position.x + obj1.hitbox.width > player.position.x && player.position.x + player.hitbox.width > obj1.position.x && obj1.position.y + obj1.hitbox.height > player.position.y && player.position.y + player.hitbox.height > obj1.position.y;
 }
 
 function processInput(input, index){
 	var player = environment.players[input.playerId];
-	//console.log("x : " + player.direction.x);
-	//console.log("y : " + player.direction.y);
 
 	switch(input.userInput) {
 		case 'UP_PRESSED':
@@ -130,11 +151,10 @@ function processInput(input, index){
 			break;
 	}
 	userInputs.splice(index, 1);
-	//console.log(player);
-	//console.log("----");
-	//console.log(environment.players);
 }
 
+/* Transformation du tableau map en objets avec coordonnées */
+/* Permet de générer plus facilement de nouvelles maps */
 function createMap(map){
 	var x = 0;
 	var y = 0;
@@ -143,25 +163,30 @@ function createMap(map){
 	    for(var j = 0; j < line.length; j++) {
 	        switch(line[j]){
 	        	case 'W':
-	        		j <= 0 ? x = 0 : x +=100;
-	        		environment.walls.push({position: {x: x, y: y}, hitbox:{width:60, height:100}});
+	        		j <= 0 ? x = 0 : x +=50;
+	        		environment.walls.push({position: {x: x, y: y}, hitbox:{width:50, height:50}});
 		    		break;
 		    	default:
-		    		j <= 0 ? x = 0 : x +=100;
+		    		j <= 0 ? x = 0 : x +=50;
 	        }
 	    }
 	    x = 0;
-	    y += 60;
+	    y += 50;
 	}
 }
 
-/*function gameLoop() {
+
+/* CPU ne supporte pas */
+
+
+function gameLoop() {
 	userInputs.forEach(processInput);
 	//console.log(environment.players);
 	updateEnvironment();
 	io.emit('updateEnvironment', environment);
-}*/
-//setInterval(gameLoop, 1000/1000);
+}
+setInterval(gameLoop, 1);
+
 
 io.on('connection', newConnection);
 
