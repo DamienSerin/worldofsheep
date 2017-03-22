@@ -39,6 +39,16 @@ socket.on('updateEnvironment', function(newEnvironment){
 
 });
 
+socket.on('dead', function(){
+	console.log("DEAD");
+	ctxfg.clearRect(0, 0, canvasfg.width, canvasfg.height);
+	//ctxfg.font = "50px OptimusPrinceps.ttf";
+	ctxfg.fillStyle = "red";
+	ctxfg.textAlign = "center";
+	ctxfg.fillText("YOU DIED", canvas.width/2, canvas.height/2); 
+	console.log("END DEAD");
+});
+
 $(document).on('keydown', function(event){
 	switch(event.keyCode){
 		case 37:
@@ -88,7 +98,7 @@ $(document).on('mousedown', function(event){
 			var dirx = (shoot_x-player.position.x)/norm;
 			var diry = (shoot_y-player.position.y)/norm;
 
-			socket.emit('shoot', {playerId: myPlayerId, position:{x: player.position.x, y: player.position.y}, direct:{dirx: dirx, diry: diry}});
+			socket.emit('shoot', {playerId: myPlayerId, damage: 1, scoreIncrease: 1, speed: 1, hitbox: {width: 20, height: 20}, position:{x: player.position.x, y: player.position.y}, direct:{dirx: dirx, diry: diry}});
 			
 			break;
 

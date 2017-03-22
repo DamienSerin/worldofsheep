@@ -6,24 +6,27 @@ var io = require('socket.io')(server);
 app.use(express.static('public'));
 var nextPlayerId = 1;
 
+var spawns = [];
+
 var environment = {
 	players: {},
 	objects: [],
 	shots: [],
-	walls: []
+	walls: [],
+	hightscores: []
 };
 
 var map = [
 ['W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W'],
 ['W','','','','','','','','','W','W','','','','','','','','','W'],
-['W','','','W','','W','','','','W','W','','','','','','','','','W'],
-['W','','','','W','','','','','W','W','','','','','','','','','W'],
-['W','','','','','','','','','W','W','','','','','','','','','W'],
-['W','','','','','','','','','','','','','','','','','','','W'],
+['W','','','W','','W','','','','W','W','','','','','','S','','','W'],
+['W','','','','W','','','S','','W','W','','S','','','','','','','W'],
+['W','S','','','','','','','','W','W','','','','','','','','','W'],
+['W','','','','S','','','','','','','','','','','','','','','W'],
 ['W','','','W','','W','','','','','','','','','','','','','','W'],
-['W','','','','W','','','','','W','W','','','','','','','','','W'],
-['W','','','','','','','','','W','W','','','','','','','','','W'],
-['W','','','','W','','','','','W','W','','','','','','','','','W'],
+['W','','','','W','','','','','W','W','','','','','','','S','','W'],
+['W','','','','','','','','S','W','W','','S','','','','','','','W'],
+['W','','S','','W','','','','','W','W','','','','','','','','','W'],
 ['W','','','','','','','','','W','W','','','','','','','','','W'],
 ['W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W','W']
 ];
@@ -33,17 +36,21 @@ var userInputs = [];
 function newConnection(socket) {
 	var playerId = nextPlayerId++;
 	environment.players[playerId] = {
+		name: playerId,
 		playerId: playerId,
-		position: {x: 200, y:200}, 
+		score: 0,
+		lifepoints: 10,
+		position: {x: 0, y: 0}, 
 		direction: {x: 0, y: 0},
 		hitbox: {width: 20, height: 20},
 		speed: 0.5,
 		score: 0
 	};
 
+	mysock = socket;
 	/* créer les éléments statiques de la map */ 
 	createMap(map);
-
+	spawn(environment.players[playerId]);
 	/* initialisation du jeu */
 	socket.emit('init', {playerId: playerId, environment: environment});
 
@@ -58,9 +65,28 @@ function newConnection(socket) {
 
 	/* supprime le joueur de l'environment lors de sa déco */
 	socket.on('disconnect', function(){
+		socket.disconnect();
 		delete environment.players[playerId];
 	});
 
+}
+
+function spawn(player){
+	var tmp = spawns[Math.floor(Math.random() * spawns.length)];
+	var canSpawn = false;
+	while(canSpawn == false){
+		canSpawn = true;
+		for(var playr in environment.players){
+			if(collide(environment.players[playr], tmp)){
+				tmp = spawns[Math.floor(Math.random() * spawns.length)];
+				canSpawn = false;
+				break;
+			}
+		}	
+	}	
+	player.position.x = tmp.position.x;
+	player.position.y = tmp.position.y;
+	console.log("yo");
 }
 
 /* met à jour un joueur */
@@ -98,7 +124,53 @@ function updatePlayer(player) {
 		}
 }
 
+function isDead(player){
+	"use strict";
+	if(player.lifepoints <= 0){
+		for(let score of environment.hightscores){
+			if(player.score > score.score){
+				var tmp = environment.hightscores.indexOf(score);
+				environment.hightscores.splice(tmp, 0, {player: player.playerId, score: player.score});
+
+				if(environment.hightscores.length > 20){
+					environment.hightscores.pop();
+				}
+			}
+		}
+		//envoyer un message dead
+		//io.emit('dead', {});
+		delete environment.players[player.playerId];
+		return true;
+	}
+	return false;
+}
+
 function updateShot(shot){
+	"use strict";
+	var walls = environment.walls;
+	var tmp = environment.shots.indexOf(shot);
+	for(let wall of walls){
+		if(collide(wall, shot)){
+			environment.shots.splice(tmp,1);
+	    	return;
+	    }
+	}
+	for(var playr in environment.players){
+		if(collide(environment.players[playr], shot)&& environment.players[playr].playerId != shot.playerId){
+
+			environment.players[playr].lifepoints -= shot.damage;
+			
+			//environment.players[playr].score -= 1;
+			environment.players[shot.playerId].score += shot.scoreIncrease;
+			environment.shots.splice(tmp,1);
+			console.log("je suis touché : " + environment.players[playr].playerId + " " + environment.players[playr].lifepoints);
+			console.log("j'ai touché qqun : " + shot.playerId + " " + environment.players[shot.playerId].score);
+
+			isDead(environment.players[playr]);
+			return;
+		}
+	}
+
 	shot.position.x += shot.direct.dirx * 0.8;
 	shot.position.y += shot.direct.diry * 0.8;	
 }
@@ -166,6 +238,10 @@ function createMap(map){
 	        		j <= 0 ? x = 0 : x +=50;
 	        		environment.walls.push({position: {x: x, y: y}, hitbox:{width:50, height:50}});
 		    		break;
+		    	case 'S':
+		    		j <= 0 ? x = 0 : x +=50;
+		    		spawns.push({position: {x: x, y: y}, hitbox:{width:50, height:50}});
+		    		break;
 		    	default:
 		    		j <= 0 ? x = 0 : x +=50;
 	        }
@@ -185,7 +261,7 @@ function gameLoop() {
 	updateEnvironment();
 	io.emit('updateEnvironment', environment);
 }
-setInterval(gameLoop, 1);
+setInterval(gameLoop, 60/1000);
 
 
 io.on('connection', newConnection);
