@@ -5,15 +5,20 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "browserify game.js > public/bundle.js && node server.js"
+    "start": "browserify client.js -o ./public/bundle.js -t [ babelify --presets [env] ] && node start.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "express": "^4.14.1",
-    "socket.io": "^1.7.3"
+    "socket.io": "^1.7.3",
+    "underscore": "^1.8.3"
   },
   "devDependencies": {
+    "babel-cli": "^6.24.1",
+    "babel-preset-env": "^1.5.1",
+    "babel-register": "^6.24.1",
+    "babelify": "^7.3.0",
     "browserify": "^14.1.0",
     "jquery": "^3.1.1",
     "socket.io-client": "^1.7.3"
