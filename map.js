@@ -46,19 +46,20 @@ class Map{
         img.src = color;
     }
 
-    /*drawShot(shot){
-        ctxfg.beginPath();
-        ctxfg.rect(shot.position.x, shot.position.y, 10, 10);
-        ctxfg.fillStyle = "white";
-        ctxfg.fill();
-        ctxfg.closePath();
-    }*/
+    drawBullet(canv, bullet){
+        canv.beginPath();
+        canv.rect(bullet.x, bullet.y, bullet.width, bullet.height);
+        canv.fillStyle = "white";
+        canv.fill();
+        canv.closePath();
+    }
+
     drawPlayer(canv, player) {
         //var player = environment.players[playerId];
 
         /* pre rendering */
         canv.beginPath();
-        canv.rect(player.position.x, player.position.y, player.hitbox.width, player.hitbox.height);
+        canv.rect(player.x, player.y, player.width, player.height);
         canv.fillStyle = "green";
         canv.fill();
         canv.closePath();

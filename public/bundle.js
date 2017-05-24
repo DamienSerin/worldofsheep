@@ -1,13 +1,66 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+exports.Bullet = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _engine = require('./engine.js');
+
+var engine = _interopRequireWildcard(_engine);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Bullet = function () {
+	function Bullet(idOwner, x, y, dirX, dirY) {
+		_classCallCheck(this, Bullet);
+
+		this.idOwner = idOwner;
+		this.dammage = 1;
+		this.speed = 0.8;
+		this.scoreIncrease = 1;
+		this.x = x;
+		this.y = y;
+		this.width = 10;
+		this.height = 10;
+		this.dirX = dirX;
+		this.dirY = dirY;
+	}
+
+	_createClass(Bullet, [{
+		key: 'didTouch',
+		value: function didTouch(player) {
+			return engine.collide(player, this) && player.id != this.idOwner;
+		}
+	}]);
+
+	return Bullet;
+}();
+
+exports.Bullet = Bullet;
+
+},{"./engine.js":4}],2:[function(require,module,exports){
+'use strict';
+
+var _underscore = require('underscore');
+
+var _underscore2 = _interopRequireDefault(_underscore);
+
 var _game = require('./game.js');
 
 var _map = require('./map.js');
 
+var _bullet = require('./bullet.js');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 var $ = require("jquery");
 var socket = require('socket.io-client')();
-
 
 /* Canvas pour afficher le background de la map qui n'a besoin d'être déssiné qu'une seule fois */
 var canvasbg = document.getElementById('canvasbg');
@@ -18,26 +71,23 @@ var ctxbg = canvasbg.getContext('2d');
 var ctxfg = canvasfg.getContext('2d');
 
 /* Canvas for pre-rendering */
-var tmp_canvas = document.createElement('canvas');
-var tmp_ctx = tmp_canvas.getContext('2d');
+/*const tmp_canvas = document.createElement('canvas');
+const tmp_ctx = tmp_canvas.getContext('2d');
 tmp_canvas.width = 1000;
 tmp_canvas.height = 600;
+*/
 
 var myPlayerId = -1;
 var players = null;
-
+var bullets = null;
 var map = new _map.Map();
 
 socket.on('playerInit', function (args) {
     myPlayerId = args.id;
-    players = JSON.parse(args.players);
-    var tmp = JSON.parse(args.map);
-    map.walls = tmp.walls;
-    map.spawns = tmp.spawns;
+    convertNewWorld(args);
     console.log(myPlayerId);
     console.log(players);
     console.log(map);
-    //map.walls.forEach(drawWall);
     var _iteratorNormalCompletion = true;
     var _didIteratorError = false;
     var _iteratorError = undefined;
@@ -62,9 +112,139 @@ socket.on('playerInit', function (args) {
             }
         }
     }
+
+    renderWorld(map, players);
 });
 
-},{"./game.js":4,"./map.js":5,"jquery":35,"socket.io-client":41}],2:[function(require,module,exports){
+socket.on('updateWorld', function (nWorld) {
+    convertNewWorld(nWorld);
+    renderWorld();
+});
+
+function renderWorld() {
+    ctxfg.clearRect(0, 0, canvasfg.width, canvasfg.height);
+    var _iteratorNormalCompletion2 = true;
+    var _didIteratorError2 = false;
+    var _iteratorError2 = undefined;
+
+    try {
+        for (var _iterator2 = players[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+            var player = _step2.value;
+
+            map.drawPlayer(ctxfg, player);
+        }
+    } catch (err) {
+        _didIteratorError2 = true;
+        _iteratorError2 = err;
+    } finally {
+        try {
+            if (!_iteratorNormalCompletion2 && _iterator2.return) {
+                _iterator2.return();
+            }
+        } finally {
+            if (_didIteratorError2) {
+                throw _iteratorError2;
+            }
+        }
+    }
+
+    var _iteratorNormalCompletion3 = true;
+    var _didIteratorError3 = false;
+    var _iteratorError3 = undefined;
+
+    try {
+        for (var _iterator3 = bullets[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+            var bullet = _step3.value;
+
+            map.drawBullet(ctxfg, bullet);
+        }
+    } catch (err) {
+        _didIteratorError3 = true;
+        _iteratorError3 = err;
+    } finally {
+        try {
+            if (!_iteratorNormalCompletion3 && _iterator3.return) {
+                _iterator3.return();
+            }
+        } finally {
+            if (_didIteratorError3) {
+                throw _iteratorError3;
+            }
+        }
+    }
+}
+
+function convertNewWorld(nWorld) {
+    players = JSON.parse(nWorld.players);
+    var tmp = JSON.parse(nWorld.map);
+    bullets = JSON.parse(nWorld.bullets);
+    map.walls = tmp.walls;
+    map.spawns = tmp.spawns;
+}
+
+$(document).on('keydown', function (event) {
+    switch (event.keyCode) {
+        case 37:
+            socket.emit('input', { id: myPlayerId, key: 'LEFT_PRESSED' });
+            break;
+        case 38:
+            socket.emit('input', { id: myPlayerId, key: 'UP_PRESSED' });
+            break;
+        case 39:
+            socket.emit('input', { id: myPlayerId, key: 'RIGHT_PRESSED' });
+            break;
+        case 40:
+            socket.emit('input', { id: myPlayerId, key: 'DOWN_PRESSED' });
+            break;
+        default:
+            break;
+    }
+});
+
+$(document).on('keyup', function (event) {
+    switch (event.keyCode) {
+        case 37:
+            socket.emit('input', { id: myPlayerId, key: 'LEFT_RELEASED' });
+            break;
+        case 38:
+            socket.emit('input', { id: myPlayerId, key: 'UP_RELEASED' });
+            break;
+        case 39:
+            socket.emit('input', { id: myPlayerId, key: 'RIGHT_RELEASED' });
+            break;
+        case 40:
+            socket.emit('input', { id: myPlayerId, key: 'DOWN_RELEASED' });
+            break;
+        default:
+            break;
+    }
+});
+
+$(document).on('mousedown', function (event) {
+    switch (event.which) {
+        case 1:
+
+            var player = _underscore2.default.findWhere(players, { id: myPlayerId });
+
+            console.log(players);
+            console.log(player);
+
+            var shoot_x = event.clientX;
+            var shoot_y = event.clientY;
+
+            var norm = Math.sqrt(Math.pow(shoot_y - player.y, 2) + Math.pow(shoot_x - player.x, 2));
+            var dirx = (shoot_x - player.x) / norm;
+            var diry = (shoot_y - player.y) / norm;
+            var bullet = new _bullet.Bullet(player.id, player.x, player.y, dirx, diry);
+            socket.emit('shoot', { bullet: bullet });
+            break;
+
+        default:
+            break;
+    }
+});
+
+},{"./bullet.js":1,"./game.js":5,"./map.js":6,"jquery":36,"socket.io-client":42,"underscore":58}],3:[function(require,module,exports){
 module.exports={
     "map1" : [
     ["W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W"],
@@ -82,19 +262,50 @@ module.exports={
     ]
 }
 
-},{}],3:[function(require,module,exports){
-"use strict";
+},{}],4:[function(require,module,exports){
+'use strict';
 
 Object.defineProperty(exports, "__esModule", {
-  value: true
+	value: true
 });
 function collide(obj1, player) {
-  return obj1.x + obj1.width > player.x && player.x + player.width > obj1.x && obj1.y + obj1.height > player.y && player.y + player.height > obj1.y;
+	return obj1.x + obj1.width > player.x && player.x + player.width > obj1.x && obj1.y + obj1.height > player.y && player.y + player.height > obj1.y;
 }
 
+function processInput(player, key) {
+	switch (key) {
+		case 'UP_PRESSED':
+			player.dirY = -1;
+			break;
+		case 'UP_RELEASED':
+			player.dirY = 0;
+			break;
+		case 'DOWN_PRESSED':
+			player.dirY = 1;
+			break;
+		case 'DOWN_RELEASED':
+			player.dirY = 0;
+			break;
+		case 'LEFT_PRESSED':
+			player.dirX = -1;
+			break;
+		case 'LEFT_RELEASED':
+			player.dirX = 0;
+			break;
+		case 'RIGHT_PRESSED':
+			player.dirX = 1;
+			break;
+		case 'RIGHT_RELEASED':
+			player.dirX = 0;
+			break;
+		default:
+			break;
+	}
+}
 exports.collide = collide;
+exports.processInput = processInput;
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -111,6 +322,8 @@ var _underscore2 = _interopRequireDefault(_underscore);
 var _player = require('./player.js');
 
 var _map = require('./map.js');
+
+var _bullet = require('./bullet.js');
 
 var _engine = require('./engine.js');
 
@@ -130,7 +343,8 @@ var Game = function () {
 
         this.players = [];
         this.sockets = [];
-
+        this.bullets = [];
+        this.highscores = [];
         this.map = new _map.Map();
         this.map.generateMap(config.map1);
     }
@@ -149,6 +363,22 @@ var Game = function () {
             var player = new _player.Player(playerId);
             this.players.push(player);
             return player;
+        }
+    }, {
+        key: 'addBullet',
+        value: function addBullet(arg) {
+            var bullet = new _bullet.Bullet(arg.idOwner, arg.x, arg.y, arg.dirX, arg.dirY);
+            this.bullets.push(bullet);
+        }
+    }, {
+        key: 'removeBullet',
+        value: function removeBullet(bullet) {
+            this.bullets = _underscore2.default.without(this.bullets, bullet);
+        }
+    }, {
+        key: 'removePlayer',
+        value: function removePlayer(player) {
+            this.players = _underscore2.default.without(this.players, player);
         }
     }, {
         key: 'placePlayer',
@@ -190,6 +420,238 @@ var Game = function () {
             player.x = tmp.x;
             player.y = tmp.y;
         }
+    }, {
+        key: 'checkForHighScores',
+        value: function checkForHighScores(player) {
+            var _iteratorNormalCompletion2 = true;
+            var _didIteratorError2 = false;
+            var _iteratorError2 = undefined;
+
+            try {
+                for (var _iterator2 = this.highscores[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+                    var score = _step2.value;
+
+                    if (player.score > score.score) {
+                        var tmp = this.highscores.indexOf(score);
+                        this.highscores.splice(tmp, 0, { player: player.id, score: player.score });
+                        if (this.highscores.length > 20) {
+                            this.highscores.pop();
+                        }
+                    }
+                }
+            } catch (err) {
+                _didIteratorError2 = true;
+                _iteratorError2 = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
+                        _iterator2.return();
+                    }
+                } finally {
+                    if (_didIteratorError2) {
+                        throw _iteratorError2;
+                    }
+                }
+            }
+        }
+    }, {
+        key: 'onDeath',
+        value: function onDeath(player) {
+            this.checkForHighScores(player);
+            player.state = "dead";
+        }
+    }, {
+        key: 'updatePlayer',
+        value: function updatePlayer(player) {
+            var oldx = player.x;
+            var oldy = player.y;
+
+            /* update de la position du joueur */
+            player.x += player.dirX * player.speed;
+            player.y += player.dirY * player.speed;
+
+            /* check les collisions avec les murs */
+            var _iteratorNormalCompletion3 = true;
+            var _didIteratorError3 = false;
+            var _iteratorError3 = undefined;
+
+            try {
+                for (var _iterator3 = this.map.walls[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+                    var wall = _step3.value;
+
+                    if (engine.collide(wall, player)) {
+                        /* si colision retour à l'ancienne position */
+                        player.x = oldx;
+                        player.y = oldy;
+                        return;
+                    }
+                }
+                /* check les collisions entre joueurs */
+            } catch (err) {
+                _didIteratorError3 = true;
+                _iteratorError3 = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion3 && _iterator3.return) {
+                        _iterator3.return();
+                    }
+                } finally {
+                    if (_didIteratorError3) {
+                        throw _iteratorError3;
+                    }
+                }
+            }
+
+            var _iteratorNormalCompletion4 = true;
+            var _didIteratorError4 = false;
+            var _iteratorError4 = undefined;
+
+            try {
+                for (var _iterator4 = this.players[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+                    var playr = _step4.value;
+
+                    if (engine.collide(playr, player) && playr.id != player.id) {
+                        /* si colision retour à l'ancienne position */
+                        player.x = oldx;
+                        player.y = oldy;
+                        return;
+                    }
+                }
+            } catch (err) {
+                _didIteratorError4 = true;
+                _iteratorError4 = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion4 && _iterator4.return) {
+                        _iterator4.return();
+                    }
+                } finally {
+                    if (_didIteratorError4) {
+                        throw _iteratorError4;
+                    }
+                }
+            }
+        }
+    }, {
+        key: 'updateBullet',
+        value: function updateBullet(bullet) {
+            var _iteratorNormalCompletion5 = true;
+            var _didIteratorError5 = false;
+            var _iteratorError5 = undefined;
+
+            try {
+                for (var _iterator5 = this.map.walls[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+                    var wall = _step5.value;
+
+                    if (engine.collide(wall, bullet)) {
+                        this.removeBullet(bullet);
+                        return;
+                    }
+                }
+            } catch (err) {
+                _didIteratorError5 = true;
+                _iteratorError5 = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion5 && _iterator5.return) {
+                        _iterator5.return();
+                    }
+                } finally {
+                    if (_didIteratorError5) {
+                        throw _iteratorError5;
+                    }
+                }
+            }
+
+            var _iteratorNormalCompletion6 = true;
+            var _didIteratorError6 = false;
+            var _iteratorError6 = undefined;
+
+            try {
+                for (var _iterator6 = this.players[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+                    var player = _step6.value;
+
+                    if (bullet.didTouch(player)) {
+                        player.getTouched(bullet);
+                        this.getPlayer(bullet.idOwner).ennemyTouched(bullet);
+                        this.removeBullet(bullet);
+                        if (player.isDead()) {
+                            this.onDeath(player);
+                        }
+                        return;
+                    }
+                }
+            } catch (err) {
+                _didIteratorError6 = true;
+                _iteratorError6 = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion6 && _iterator6.return) {
+                        _iterator6.return();
+                    }
+                } finally {
+                    if (_didIteratorError6) {
+                        throw _iteratorError6;
+                    }
+                }
+            }
+
+            bullet.x += bullet.dirX * bullet.speed;
+            bullet.y += bullet.dirY * bullet.speed;
+        }
+    }, {
+        key: 'updateWorld',
+        value: function updateWorld() {
+            var _iteratorNormalCompletion7 = true;
+            var _didIteratorError7 = false;
+            var _iteratorError7 = undefined;
+
+            try {
+                for (var _iterator7 = this.players[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
+                    var player = _step7.value;
+
+                    this.updatePlayer(player);
+                }
+            } catch (err) {
+                _didIteratorError7 = true;
+                _iteratorError7 = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion7 && _iterator7.return) {
+                        _iterator7.return();
+                    }
+                } finally {
+                    if (_didIteratorError7) {
+                        throw _iteratorError7;
+                    }
+                }
+            }
+
+            var _iteratorNormalCompletion8 = true;
+            var _didIteratorError8 = false;
+            var _iteratorError8 = undefined;
+
+            try {
+                for (var _iterator8 = this.bullets[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
+                    var bullet = _step8.value;
+
+                    this.updateBullet(bullet);
+                }
+            } catch (err) {
+                _didIteratorError8 = true;
+                _iteratorError8 = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion8 && _iterator8.return) {
+                        _iterator8.return();
+                    }
+                } finally {
+                    if (_didIteratorError8) {
+                        throw _iteratorError8;
+                    }
+                }
+            }
+        }
     }]);
 
     return Game;
@@ -197,7 +659,7 @@ var Game = function () {
 
 exports.Game = Game;
 
-},{"./config.json":2,"./engine.js":3,"./map.js":5,"./player.js":60,"underscore":57}],5:[function(require,module,exports){
+},{"./bullet.js":1,"./config.json":3,"./engine.js":4,"./map.js":6,"./player.js":61,"underscore":58}],6:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -262,15 +724,27 @@ var Map = function () {
             };
             img.src = color;
         }
+    }, {
+        key: 'drawBullet',
+        value: function drawBullet(canv, bullet) {
+            canv.beginPath();
+            canv.rect(bullet.x, bullet.y, bullet.width, bullet.height);
+            canv.fillStyle = "white";
+            canv.fill();
+            canv.closePath();
+        }
+    }, {
+        key: 'drawPlayer',
+        value: function drawPlayer(canv, player) {
+            //var player = environment.players[playerId];
 
-        /*drawShot(shot){
-            ctxfg.beginPath();
-            ctxfg.rect(shot.position.x, shot.position.y, 10, 10);
-            ctxfg.fillStyle = "white";
-            ctxfg.fill();
-            ctxfg.closePath();
-        }*/
-
+            /* pre rendering */
+            canv.beginPath();
+            canv.rect(player.x, player.y, player.width, player.height);
+            canv.fillStyle = "green";
+            canv.fill();
+            canv.closePath();
+        }
     }, {
         key: 'drawWall',
         value: function drawWall(canv, wall) {
@@ -283,7 +757,7 @@ var Map = function () {
 
 exports.Map = Map;
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 module.exports = after
 
 function after(count, callback, err_cb) {
@@ -313,7 +787,7 @@ function after(count, callback, err_cb) {
 
 function noop() {}
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 /**
  * An abstraction for slicing an arraybuffer even when
  * ArrayBuffer.prototype.slice is not supported
@@ -344,7 +818,7 @@ module.exports = function(arraybuffer, start, end) {
   return result.buffer;
 };
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 
 /**
  * Expose `Backoff`.
@@ -431,7 +905,7 @@ Backoff.prototype.setJitter = function(jitter){
 };
 
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 /*
  * base64-arraybuffer
  * https://github.com/niklasvh/base64-arraybuffer
@@ -500,7 +974,7 @@ Backoff.prototype.setJitter = function(jitter){
   };
 })();
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 (function (global){
 /**
  * Create a blob builder even when vendor prefixes exist
@@ -600,9 +1074,9 @@ module.exports = (function() {
 })();
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],11:[function(require,module,exports){
-
 },{}],12:[function(require,module,exports){
+
+},{}],13:[function(require,module,exports){
 /**
  * Slice reference.
  */
@@ -627,7 +1101,7 @@ module.exports = function(obj, fn){
   }
 };
 
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 
 /**
  * Expose `Emitter`.
@@ -793,7 +1267,7 @@ Emitter.prototype.hasListeners = function(event){
   return !! this.listeners(event).length;
 };
 
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 
 module.exports = function(a, b){
   var fn = function(){};
@@ -801,11 +1275,11 @@ module.exports = function(a, b){
   a.prototype = new fn;
   a.prototype.constructor = a;
 };
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 
 module.exports = require('./lib/index');
 
-},{"./lib/index":16}],16:[function(require,module,exports){
+},{"./lib/index":17}],17:[function(require,module,exports){
 
 module.exports = require('./socket');
 
@@ -817,7 +1291,7 @@ module.exports = require('./socket');
  */
 module.exports.parser = require('engine.io-parser');
 
-},{"./socket":17,"engine.io-parser":29}],17:[function(require,module,exports){
+},{"./socket":18,"engine.io-parser":30}],18:[function(require,module,exports){
 (function (global){
 /**
  * Module dependencies.
@@ -1559,7 +2033,7 @@ Socket.prototype.filterUpgrades = function (upgrades) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./transport":18,"./transports/index":19,"component-emitter":25,"debug":26,"engine.io-parser":29,"indexof":33,"parsejson":37,"parseqs":38,"parseuri":39}],18:[function(require,module,exports){
+},{"./transport":19,"./transports/index":20,"component-emitter":26,"debug":27,"engine.io-parser":30,"indexof":34,"parsejson":38,"parseqs":39,"parseuri":40}],19:[function(require,module,exports){
 /**
  * Module dependencies.
  */
@@ -1718,7 +2192,7 @@ Transport.prototype.onClose = function () {
   this.emit('close');
 };
 
-},{"component-emitter":25,"engine.io-parser":29}],19:[function(require,module,exports){
+},{"component-emitter":26,"engine.io-parser":30}],20:[function(require,module,exports){
 (function (global){
 /**
  * Module dependencies
@@ -1775,7 +2249,7 @@ function polling (opts) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./polling-jsonp":20,"./polling-xhr":21,"./websocket":23,"xmlhttprequest-ssl":24}],20:[function(require,module,exports){
+},{"./polling-jsonp":21,"./polling-xhr":22,"./websocket":24,"xmlhttprequest-ssl":25}],21:[function(require,module,exports){
 (function (global){
 
 /**
@@ -2010,7 +2484,7 @@ JSONPPolling.prototype.doWrite = function (data, fn) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./polling":22,"component-inherit":14}],21:[function(require,module,exports){
+},{"./polling":23,"component-inherit":15}],22:[function(require,module,exports){
 (function (global){
 /**
  * Module requirements.
@@ -2438,7 +2912,7 @@ function unloadHandler () {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./polling":22,"component-emitter":25,"component-inherit":14,"debug":26,"xmlhttprequest-ssl":24}],22:[function(require,module,exports){
+},{"./polling":23,"component-emitter":26,"component-inherit":15,"debug":27,"xmlhttprequest-ssl":25}],23:[function(require,module,exports){
 /**
  * Module dependencies.
  */
@@ -2685,7 +3159,7 @@ Polling.prototype.uri = function () {
   return schema + '://' + (ipv6 ? '[' + this.hostname + ']' : this.hostname) + port + this.path + query;
 };
 
-},{"../transport":18,"component-inherit":14,"debug":26,"engine.io-parser":29,"parseqs":38,"xmlhttprequest-ssl":24,"yeast":59}],23:[function(require,module,exports){
+},{"../transport":19,"component-inherit":15,"debug":27,"engine.io-parser":30,"parseqs":39,"xmlhttprequest-ssl":25,"yeast":60}],24:[function(require,module,exports){
 (function (global){
 /**
  * Module dependencies.
@@ -2974,7 +3448,7 @@ WS.prototype.check = function () {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../transport":18,"component-inherit":14,"debug":26,"engine.io-parser":29,"parseqs":38,"ws":11,"yeast":59}],24:[function(require,module,exports){
+},{"../transport":19,"component-inherit":15,"debug":27,"engine.io-parser":30,"parseqs":39,"ws":12,"yeast":60}],25:[function(require,module,exports){
 (function (global){
 // browser shim for xmlhttprequest module
 
@@ -3015,7 +3489,7 @@ module.exports = function (opts) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"has-cors":32}],25:[function(require,module,exports){
+},{"has-cors":33}],26:[function(require,module,exports){
 
 /**
  * Expose `Emitter`.
@@ -3180,7 +3654,7 @@ Emitter.prototype.hasListeners = function(event){
   return !! this.listeners(event).length;
 };
 
-},{}],26:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 (function (process){
 
 /**
@@ -3361,7 +3835,7 @@ function localstorage(){
 }
 
 }).call(this,require('_process'))
-},{"./debug":27,"_process":40}],27:[function(require,module,exports){
+},{"./debug":28,"_process":41}],28:[function(require,module,exports){
 
 /**
  * This is the common logic for both the Node.js and web browser
@@ -3563,7 +4037,7 @@ function coerce(val) {
   return val;
 }
 
-},{"ms":28}],28:[function(require,module,exports){
+},{"ms":29}],29:[function(require,module,exports){
 /**
  * Helpers.
  */
@@ -3714,7 +4188,7 @@ function plural(ms, n, name) {
   return Math.ceil(ms / n) + ' ' + name + 's'
 }
 
-},{}],29:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 (function (global){
 /**
  * Module dependencies.
@@ -4327,7 +4801,7 @@ exports.decodePayloadAsBinary = function (data, binaryType, callback) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./keys":30,"after":6,"arraybuffer.slice":7,"base64-arraybuffer":9,"blob":10,"has-binary":31,"wtf-8":58}],30:[function(require,module,exports){
+},{"./keys":31,"after":7,"arraybuffer.slice":8,"base64-arraybuffer":10,"blob":11,"has-binary":32,"wtf-8":59}],31:[function(require,module,exports){
 
 /**
  * Gets the keys for an object.
@@ -4348,7 +4822,7 @@ module.exports = Object.keys || function keys (obj){
   return arr;
 };
 
-},{}],31:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 (function (global){
 
 /*
@@ -4411,7 +4885,7 @@ function hasBinary(data) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"isarray":34}],32:[function(require,module,exports){
+},{"isarray":35}],33:[function(require,module,exports){
 
 /**
  * Module exports.
@@ -4430,7 +4904,7 @@ try {
   module.exports = false;
 }
 
-},{}],33:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 
 var indexOf = [].indexOf;
 
@@ -4441,12 +4915,12 @@ module.exports = function(arr, obj){
   }
   return -1;
 };
-},{}],34:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 module.exports = Array.isArray || function (arr) {
   return Object.prototype.toString.call(arr) == '[object Array]';
 };
 
-},{}],35:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v3.2.1
  * https://jquery.com/
@@ -14701,7 +15175,7 @@ if ( !noGlobal ) {
 return jQuery;
 } );
 
-},{}],36:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 (function (global){
 /*! JSON v3.3.2 | http://bestiejs.github.io/json3 | Copyright 2012-2014, Kit Cambridge | http://kit.mit-license.org */
 ;(function () {
@@ -15607,7 +16081,7 @@ return jQuery;
 }).call(this);
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],37:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 (function (global){
 /**
  * JSON parse.
@@ -15642,7 +16116,7 @@ module.exports = function parsejson(data) {
   }
 };
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],38:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 /**
  * Compiles a querystring
  * Returns string representation of the object
@@ -15681,7 +16155,7 @@ exports.decode = function(qs){
   return qry;
 };
 
-},{}],39:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 /**
  * Parses an URI
  *
@@ -15722,7 +16196,7 @@ module.exports = function parseuri(str) {
     return uri;
 };
 
-},{}],40:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -15908,7 +16382,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],41:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -16019,7 +16493,7 @@ exports.connect = lookup;
 exports.Manager = require('./manager');
 exports.Socket = require('./socket');
 
-},{"./manager":42,"./socket":44,"./url":45,"debug":47,"socket.io-parser":51}],42:[function(require,module,exports){
+},{"./manager":43,"./socket":45,"./url":46,"debug":48,"socket.io-parser":52}],43:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -16581,7 +17055,7 @@ Manager.prototype.onreconnect = function () {
   this.emitAll('reconnect', attempt);
 };
 
-},{"./on":43,"./socket":44,"backo2":8,"component-bind":12,"component-emitter":46,"debug":47,"engine.io-client":15,"indexof":33,"socket.io-parser":51}],43:[function(require,module,exports){
+},{"./on":44,"./socket":45,"backo2":9,"component-bind":13,"component-emitter":47,"debug":48,"engine.io-client":16,"indexof":34,"socket.io-parser":52}],44:[function(require,module,exports){
 
 /**
  * Module exports.
@@ -16607,7 +17081,7 @@ function on (obj, ev, fn) {
   };
 }
 
-},{}],44:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -17028,7 +17502,7 @@ Socket.prototype.compress = function (compress) {
   return this;
 };
 
-},{"./on":43,"component-bind":12,"component-emitter":46,"debug":47,"has-binary":31,"socket.io-parser":51,"to-array":56}],45:[function(require,module,exports){
+},{"./on":44,"component-bind":13,"component-emitter":47,"debug":48,"has-binary":32,"socket.io-parser":52,"to-array":57}],46:[function(require,module,exports){
 (function (global){
 
 /**
@@ -17107,15 +17581,15 @@ function url (uri, loc) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"debug":47,"parseuri":39}],46:[function(require,module,exports){
-arguments[4][25][0].apply(exports,arguments)
-},{"dup":25}],47:[function(require,module,exports){
+},{"debug":48,"parseuri":40}],47:[function(require,module,exports){
 arguments[4][26][0].apply(exports,arguments)
-},{"./debug":48,"_process":40,"dup":26}],48:[function(require,module,exports){
+},{"dup":26}],48:[function(require,module,exports){
 arguments[4][27][0].apply(exports,arguments)
-},{"dup":27,"ms":49}],49:[function(require,module,exports){
+},{"./debug":49,"_process":41,"dup":27}],49:[function(require,module,exports){
 arguments[4][28][0].apply(exports,arguments)
-},{"dup":28}],50:[function(require,module,exports){
+},{"dup":28,"ms":50}],50:[function(require,module,exports){
+arguments[4][29][0].apply(exports,arguments)
+},{"dup":29}],51:[function(require,module,exports){
 (function (global){
 /*global Blob,File*/
 
@@ -17260,7 +17734,7 @@ exports.removeBlobs = function(data, callback) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./is-buffer":52,"isarray":34}],51:[function(require,module,exports){
+},{"./is-buffer":53,"isarray":35}],52:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -17666,7 +18140,7 @@ function error(data){
   };
 }
 
-},{"./binary":50,"./is-buffer":52,"component-emitter":13,"debug":53,"json3":36}],52:[function(require,module,exports){
+},{"./binary":51,"./is-buffer":53,"component-emitter":14,"debug":54,"json3":37}],53:[function(require,module,exports){
 (function (global){
 
 module.exports = isBuf;
@@ -17683,7 +18157,7 @@ function isBuf(obj) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],53:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
 
 /**
  * This is the web browser implementation of `debug()`.
@@ -17853,7 +18327,7 @@ function localstorage(){
   } catch (e) {}
 }
 
-},{"./debug":54}],54:[function(require,module,exports){
+},{"./debug":55}],55:[function(require,module,exports){
 
 /**
  * This is the common logic for both the Node.js and web browser
@@ -18052,7 +18526,7 @@ function coerce(val) {
   return val;
 }
 
-},{"ms":55}],55:[function(require,module,exports){
+},{"ms":56}],56:[function(require,module,exports){
 /**
  * Helpers.
  */
@@ -18179,7 +18653,7 @@ function plural(ms, n, name) {
   return Math.ceil(ms / n) + ' ' + name + 's';
 }
 
-},{}],56:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 module.exports = toArray
 
 function toArray(list, index) {
@@ -18194,7 +18668,7 @@ function toArray(list, index) {
     return array
 }
 
-},{}],57:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 //     Underscore.js 1.8.3
 //     http://underscorejs.org
 //     (c) 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -19744,7 +20218,7 @@ function toArray(list, index) {
   }
 }.call(this));
 
-},{}],58:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 (function (global){
 /*! https://mths.be/wtf8 v1.0.0 by @mathias */
 ;(function(root) {
@@ -19982,7 +20456,7 @@ function toArray(list, index) {
 }(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],59:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
 'use strict';
 
 var alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_'.split('')
@@ -20052,30 +20526,56 @@ yeast.encode = encode;
 yeast.decode = decode;
 module.exports = yeast;
 
-},{}],60:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var Player = function Player(playerId) {
-    _classCallCheck(this, Player);
+var Player = function () {
+    function Player(playerId) {
+        _classCallCheck(this, Player);
 
-    this.id = playerId;
-    this.score = 0;
-    this.lifepoints = 10;
-    this.speed = 0.5;
-    this.x = 0;
-    this.y = 0;
-    this.dirX = 0;
-    this.dirY = 0;
-    this.width = 20;
-    this.height = 20;
-};
+        this.id = playerId;
+        this.state = "alive";
+        this.score = 0;
+        this.lifepoints = 10;
+        this.speed = 0.5;
+        this.x = 0;
+        this.y = 0;
+        this.dirX = 0;
+        this.dirY = 0;
+        this.width = 20;
+        this.height = 20;
+        //this.bonus = new Bonus();
+        //this.malus = new Malus();
+    }
+
+    _createClass(Player, [{
+        key: "getTouched",
+        value: function getTouched(bullet) {
+            this.lifepoints -= bullet.dammage;
+        }
+    }, {
+        key: "ennemyTouched",
+        value: function ennemyTouched(bullet) {
+            this.score += bullet.scoreIncrease;
+        }
+    }, {
+        key: "isDead",
+        value: function isDead() {
+            return this.lifepoints <= 0;
+        }
+    }]);
+
+    return Player;
+}();
 
 exports.Player = Player;
 
-},{}]},{},[1]);
+},{}]},{},[2]);

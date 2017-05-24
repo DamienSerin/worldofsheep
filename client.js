@@ -1,8 +1,9 @@
+import _ from 'underscore';
 const $ = require("jquery");
 const socket = require('socket.io-client')();
 import {Game} from './game.js';
 import {Map} from './map.js';
-
+import {Bullet} from './bullet.js';
 /* Canvas pour afficher le background de la map qui n'a besoin d'être déssiné qu'une seule fois */
 const canvasbg = document.getElementById('canvasbg');
 /* Canvas pour afficher le foreground (éléments dynamiques) */
@@ -20,19 +21,104 @@ tmp_canvas.height = 600;
 
 let myPlayerId = -1;
 let players = null;
-
+let bullets = null;
 let map = new Map();
 
 socket.on('playerInit', function(args){
     myPlayerId = args.id;
-    players = JSON.parse(args.players);
-    let tmp = JSON.parse(args.map);
-    map.walls = tmp.walls;
-    map.spawns = tmp.spawns;
+    convertNewWorld(args);
     console.log(myPlayerId);
     console.log(players);
     console.log(map);
     for(let wall of map.walls){
         map.drawWall(ctxbg, wall);
+    }
+    renderWorld(map, players);
+});
+
+socket.on('updateWorld', function(nWorld){
+    convertNewWorld(nWorld);
+    renderWorld();
+
+});
+
+function renderWorld(){
+    ctxfg.clearRect(0, 0, canvasfg.width, canvasfg.height);
+    for(let player of players){
+        map.drawPlayer(ctxfg, player);
+    }
+
+    for(let bullet of bullets){
+        map.drawBullet(ctxfg, bullet);
+    }
+}
+
+function convertNewWorld(nWorld){
+    players = JSON.parse(nWorld.players);
+    let tmp = JSON.parse(nWorld.map);
+    bullets = JSON.parse(nWorld.bullets);
+    map.walls = tmp.walls;
+    map.spawns = tmp.spawns;
+}
+
+$(document).on('keydown', function(event){
+    switch(event.keyCode){
+        case 37:
+            socket.emit('input', {id: myPlayerId, key: 'LEFT_PRESSED'});
+            break;
+        case 38:
+            socket.emit('input', {id: myPlayerId, key: 'UP_PRESSED'});
+            break;
+        case 39:
+            socket.emit('input', {id: myPlayerId, key: 'RIGHT_PRESSED'});
+            break;
+        case 40:
+            socket.emit('input', {id: myPlayerId, key: 'DOWN_PRESSED'});
+            break;
+        default:
+            break;
+    }
+});
+
+$(document).on('keyup', function(event){
+    switch(event.keyCode){
+        case 37:
+            socket.emit('input', {id: myPlayerId, key: 'LEFT_RELEASED'});
+            break;
+        case 38:
+            socket.emit('input', {id: myPlayerId, key: 'UP_RELEASED'});
+            break;
+        case 39:
+            socket.emit('input', {id: myPlayerId, key: 'RIGHT_RELEASED'});
+            break;
+        case 40:
+            socket.emit('input', {id: myPlayerId, key: 'DOWN_RELEASED'});
+            break;
+        default:
+            break;
+    }
+});
+
+$(document).on('mousedown', function(event){
+    switch(event.which){
+        case 1:
+
+            let player = _.findWhere(players, {id: myPlayerId});
+
+            console.log(players);
+            console.log(player);
+
+            let shoot_x = event.clientX;
+            let shoot_y = event.clientY;
+
+            let norm = Math.sqrt(Math.pow(shoot_y-player.y,2) + Math.pow(shoot_x-player.x,2));
+            let dirx = (shoot_x-player.x)/norm;
+            let diry = (shoot_y-player.y)/norm;
+            let bullet = new Bullet(player.id, player.x, player.y, dirx, diry);
+            socket.emit('shoot', {bullet: bullet});
+            break;
+
+        default:
+            break;
     }
 });
