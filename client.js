@@ -4,7 +4,7 @@ const socket = require('socket.io-client')();
 import {Game} from './game.js';
 import {Map} from './map.js';
 import {Bullet} from './bullet.js';
-/* Canvas pour afficher le background de la map qui n'a besoin d'être déssiné qu'une seule fois */
+/* Canvas pour afficher le background de la map qui n'a besoin d'être dessiné qu'une seule fois */
 const canvasbg = document.getElementById('canvasbg');
 /* Canvas pour afficher le foreground (éléments dynamiques) */
 const canvasfg = document.getElementById('canvasfg');
@@ -19,17 +19,24 @@ tmp_canvas.width = 1000;
 tmp_canvas.height = 600;
 */
 
+let dead = false;
 let myPlayerId = -1;
 let players = null;
 let bullets = null;
 let map = new Map();
+let pseudo;
+
 
 socket.on('playerInit', function(args){
     myPlayerId = args.id;
     convertNewWorld(args);
-    console.log(myPlayerId);
-    console.log(players);
-    console.log(map);
+    /*A DECOMMENTER POUR TESTER LES PSEUDOS, LAG TROP SUR VM
+    pseudo = prompt("Veuillez saisir votre pseudo pour jouer:","Bob");
+    if(pseudo!=null && pseudo!="Bob"){
+      console.log("nom different");
+      socket.emit('setPseudo', {pseudo : pseudo});
+    }*/
+
     for(let wall of map.walls){
         map.drawWall(ctxbg, wall);
     }
@@ -38,9 +45,46 @@ socket.on('playerInit', function(args){
 
 socket.on('updateWorld', function(nWorld){
     convertNewWorld(nWorld);
-    renderWorld();
-
+    if (!death()){
+      renderWorld();
+    }
 });
+
+function updateListHighscore(){
+
+}
+
+function updateListPlayer(){
+  _.sortBy(players,'score');
+
+  let listPlayer = "";
+  for(let player of players){
+      if (player.id != myPlayerId){
+        listPlayer += "<li>"+player.pseudo+" : "+player.score+" points</li>";
+      }
+      else{
+        listPlayer += "<li>Moi : "+player.score+" points</li>";
+      }
+  }
+
+  $("#ingamelist").html(listPlayer);
+}
+
+function death(){
+  let player = _.findWhere(players, {id: myPlayerId});
+
+  if (player.state == "dead"){
+    console.log("DEAD");
+    $(document).off("keydown");
+    $(document).off("keyup");
+    $(document).off("mousedown");
+    dead = true;
+    socket.close();
+    map.drawDeadScreen(ctxfg, canvasfg);
+    return true;
+  }
+  return false;
+}
 
 function renderWorld(){
     ctxfg.clearRect(0, 0, canvasfg.width, canvasfg.height);
@@ -51,6 +95,10 @@ function renderWorld(){
     for(let bullet of bullets){
         map.drawBullet(ctxfg, bullet);
     }
+
+  //  map.drawLife(ctxfg, canvasfg, _.findWhere(players, {id: myPlayerId} ));
+
+    updateListPlayer();
 }
 
 function convertNewWorld(nWorld){
@@ -105,11 +153,12 @@ $(document).on('mousedown', function(event){
 
             let player = _.findWhere(players, {id: myPlayerId});
 
-            console.log(players);
-            console.log(player);
+            let shoot_x;
+            let shoot_y;
 
-            let shoot_x = event.clientX;
-            let shoot_y = event.clientY;
+            let rect = canvasfg.getBoundingClientRect();
+            shoot_x = event.clientX - rect.left;
+            shoot_y = event.clientY - rect.top;
 
             let norm = Math.sqrt(Math.pow(shoot_y-player.y,2) + Math.pow(shoot_x-player.x,2));
             let dirx = (shoot_x-player.x)/norm;
@@ -122,3 +171,8 @@ $(document).on('mousedown', function(event){
             break;
     }
 });
+
+/*let pseudo = prompt("Veuillez saisir votre pseudo pour jouer","Bob");
+if(pseudo!=null){
+console.log("pseudo: "+ pseudo)
+*/

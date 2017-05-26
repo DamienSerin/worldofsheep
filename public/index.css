@@ -1,0 +1,16 @@
+#joueurs{
+  position: absolute;
+  left: 1010px;
+  widht: 500px;
+  height: 600px;
+}
+
+#canvasbg{
+  position: absolute;
+  z-index: 0;
+}
+
+#canvasfg{
+  position: absolute;
+  z-index: 0;
+}

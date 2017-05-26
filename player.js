@@ -1,6 +1,7 @@
 class Player {
     constructor(playerId) {
         this.id = playerId;
+        this.pseudo = "Bob" + playerId;
         this.state = "alive";
         this.score = 0;
         this.lifepoints = 10;
@@ -25,6 +26,10 @@ class Player {
 
     isDead(){
         return this.lifepoints <= 0;
+    }
+
+    setPseudo(pseudo){
+      this.pseudo = pseudo;
     }
 }
 export {Player};

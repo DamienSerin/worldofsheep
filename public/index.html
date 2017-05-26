@@ -1,14 +1,23 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="./index.css">
+  </head>
   <body style="background-color: #0F4D8F">
     <div id="main"></div>
-    <canvas id="canvasbg" width="1000" height="600" style="position: absolute; z-index: 0">
+    <canvas id="canvasbg" width="1000" height="600" >
     	Mettez à jour votre navigateur
     </canvas>
-    <canvas id="canvasfg" width="1000" height="600" style="position: absolute; z-index: 0">
+    <canvas id="canvasfg" width="1000" height="600" >
     	Mettez à jour votre navigateur
     </canvas>
-    
+    <div id="joueurs" >
+      <b> Joueurs en partie: </b>
+      <ul id="ingamelist"></ul>
+      <b>Highscore</b>
+      <ul id="highscorelist"></ul>
+    </div>
+
     <script type="text/javascript" src="bundle.js"></script>
   </body>
 </html>

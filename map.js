@@ -46,6 +46,14 @@ class Map{
         img.src = color;
     }
 
+    drawLife(canv, canvfg, player){
+      console.log("DrawLife");
+      this.drawElement(canv, 900, 500, 20, 20, "life.png");
+      canv.fillStyle = "white";
+      canv.textAlign = "center";
+      canv.fillText("player.lifepoints",900, 500);
+    }
+
     drawBullet(canv, bullet){
         canv.beginPath();
         canv.rect(bullet.x, bullet.y, bullet.width, bullet.height);
@@ -58,12 +66,21 @@ class Map{
         //var player = environment.players[playerId];
 
         /* pre rendering */
+        if (player.state == "dead") return;
         canv.beginPath();
         canv.rect(player.x, player.y, player.width, player.height);
         canv.fillStyle = "green";
         canv.fill();
         canv.closePath();
     }
+
+    drawDeadScreen(canv, canvfg){
+      canv.clearRect(0,0,canvfg.width, canvfg.height);
+      canv.fillStyle = "red";
+      canv.textAlign = "center";
+      canv.fillText("YOU DIED", (canvfg.width)/2, (canvfg.height)/2);
+    }
+
     drawWall(canv, wall){
         this.drawElement(canv, wall.x, wall.y, wall.height, wall.width, "Tile.png");
     }

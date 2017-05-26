@@ -41,6 +41,14 @@ class Game {
         this.players = _.without(this.players, player);
     }
 
+    removeDead(){
+      for(let player of this.players){
+        if (player.isDead()){
+          this.removePlayer(player);
+        }
+      }
+    }
+
 
     placePlayer(playerId) {
         const player = this.addPlayer(playerId);
@@ -77,7 +85,7 @@ class Game {
         player.state = "dead";
     }
 
-    updatePlayer(player){        
+    updatePlayer(player){
         let oldx = player.x;
         let oldy = player.y;
 
