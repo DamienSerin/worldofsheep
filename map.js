@@ -46,13 +46,6 @@ class Map{
         img.src = color;
     }
 
-    drawLife(canv, canvfg, player){
-      console.log("DrawLife");
-      this.drawElement(canv, 900, 500, 20, 20, "life.png");
-      canv.fillStyle = "white";
-      canv.textAlign = "center";
-      canv.fillText("player.lifepoints",900, 500);
-    }
 
     drawBullet(canv, bullet){
         canv.beginPath();

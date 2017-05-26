@@ -5,6 +5,11 @@
   </head>
   <body style="background-color: #0F4D8F">
     <div id="main"></div>
+    <div id="stats">
+      <img class="flotte" src="life.png" style="width:20px;height:20px;">
+      <p id="lifePoints"></p>
+    </div>
+    <div id="canv">
     <canvas id="canvasbg" width="1000" height="600" >
     	Mettez à jour votre navigateur
     </canvas>
@@ -12,12 +17,12 @@
     	Mettez à jour votre navigateur
     </canvas>
     <div id="joueurs" >
-      <b> Joueurs en partie: </b>
+      <h2> Joueurs en partie: </h2>
       <ul id="ingamelist"></ul>
-      <b>Highscore</b>
+      <h2>Highscore</h2>
       <ul id="highscorelist"></ul>
     </div>
-
+    </div>
     <script type="text/javascript" src="bundle.js"></script>
   </body>
 </html>

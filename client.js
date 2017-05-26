@@ -30,9 +30,10 @@ let pseudo;
 socket.on('playerInit', function(args){
     myPlayerId = args.id;
     convertNewWorld(args);
-    /*A DECOMMENTER POUR TESTER LES PSEUDOS, LAG TROP SUR VM
-    pseudo = prompt("Veuillez saisir votre pseudo pour jouer:","Bob");
-    if(pseudo!=null && pseudo!="Bob"){
+
+   /* A TESTER AUTRE PART QUE SUR VM CACA 
+   pseudo = prompt("Veuillez saisir votre pseudo pour jouer:","Bob");
+   if(pseudo!=null && pseudo!="Bob"){
       console.log("nom different");
       socket.emit('setPseudo', {pseudo : pseudo});
     }*/
@@ -96,7 +97,8 @@ function renderWorld(){
         map.drawBullet(ctxfg, bullet);
     }
 
-  //  map.drawLife(ctxfg, canvasfg, _.findWhere(players, {id: myPlayerId} ));
+    /* affiche la vie qu'il reste au joueur*/
+   $("#lifePoints").html("<b>  "+ _.findWhere(players, {id: myPlayerId} ).lifepoints+"</b>");
 
     updateListPlayer();
 }
