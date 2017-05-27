@@ -42,7 +42,6 @@ class Map{
     drawPlayer(canv, player, pseudo, img) {
         /* pre rendering */
         if (player.state == "dead") return;
-        
         renderer.drawText(canv, player.x, player.y-10, pseudo, "white");
         renderer.drawImg(canv, player.x,player.y,player.width, player.height, img);
     }
@@ -50,7 +49,6 @@ class Map{
 
 
     drawDeadScreen(canv, canvfg){
-      //canv.clearRect(0,0,canvfg.width, canvfg.height
        canv.beginPath();
         canv.rect(0, 0, canvfg.width, canvfg.height);
         canv.fillStyle = "black";
@@ -63,7 +61,7 @@ class Map{
     }
 
     drawWall(canv, wall){
-        renderer.drawElement(canv, wall.x, wall.y, wall.height, wall.width, "Tile.png");
+        renderer.drawElement(canv, wall.x, wall.y, wall.height, wall.width, "./img/Tile.png");
     }
 }
 

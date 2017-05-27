@@ -10,6 +10,7 @@ class Player {
         this.y = 0;
         this.dirX = 0;
         this.dirY = 0;
+        this.direction = "down";
         this.width = 24;
         this.height = 30;
         //this.bonus = new Bonus();

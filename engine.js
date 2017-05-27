@@ -6,24 +6,28 @@ function processInput(player, key){
 	if (!player) return;
 	switch(key) {
 		case 'UP_PRESSED':
+			player.direction = "up";
 			player.dirY = -1;
 			break;
 		case 'UP_RELEASED':
 			player.dirY = 0;
 			break;
 		case 'DOWN_PRESSED':
+			player.direction="down";
 			player.dirY = 1;
 			break;
 		case 'DOWN_RELEASED':
 			player.dirY = 0;
 			break;
 		case 'LEFT_PRESSED':
+			player.direction = "left";
 			player.dirX = -1;
 			break;
 		case 'LEFT_RELEASED':
 			player.dirX = 0;
 			break;
 		case 'RIGHT_PRESSED':
+			player.direction = "right";
 			player.dirX = 1;
 			break;
 		case 'RIGHT_RELEASED':
@@ -32,7 +36,9 @@ function processInput(player, key){
 		default:
 			break;
 	}
+	
 }
+
 export {
     collide,
     processInput

@@ -94,8 +94,10 @@ tmp_canvas.height = 600;
 */
 
 var lifeimg = document.getElementById('lifepoints');
-var avatar = document.getElementById('avatarface1');
+var avatar = document.getElementById('avatar1down');
 var bulletimg1 = document.getElementById('bullet1');
+
+var avatars = [];
 
 var dead = false;
 var myPlayerId = -1;
@@ -106,7 +108,39 @@ var map = new _map.Map();
 var highscores = null;
 var pseudo = void 0;
 
+function initImg() {
+    var dir = ["up", "down", "left", "right"];
+
+    var _iteratorNormalCompletion = true;
+    var _didIteratorError = false;
+    var _iteratorError = undefined;
+
+    try {
+        for (var _iterator = dir[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+            var d = _step.value;
+
+            avatars.push(document.getElementById('avatar1' + d));
+        }
+
+        //avatars.push(document.getElementById('avatar1down'));
+        // console.log(avatars[0].id);
+    } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+    } finally {
+        try {
+            if (!_iteratorNormalCompletion && _iterator.return) {
+                _iterator.return();
+            }
+        } finally {
+            if (_didIteratorError) {
+                throw _iteratorError;
+            }
+        }
+    }
+}
 socket.on('playerInit', function (args) {
+    initImg();
     myPlayerId = args.id;
     convertNewWorld(args);
     /*gestion de la map a l'initialisation*/
@@ -121,27 +155,27 @@ socket.on('playerInit', function (args) {
        socket.emit('setPseudo', {pseudo : pseudo});
      }*/
 
-    var _iteratorNormalCompletion = true;
-    var _didIteratorError = false;
-    var _iteratorError = undefined;
+    var _iteratorNormalCompletion2 = true;
+    var _didIteratorError2 = false;
+    var _iteratorError2 = undefined;
 
     try {
-        for (var _iterator = map.walls[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-            var wall = _step.value;
+        for (var _iterator2 = map.walls[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+            var wall = _step2.value;
 
             map.drawWall(ctxbg, wall);
         }
     } catch (err) {
-        _didIteratorError = true;
-        _iteratorError = err;
+        _didIteratorError2 = true;
+        _iteratorError2 = err;
     } finally {
         try {
-            if (!_iteratorNormalCompletion && _iterator.return) {
-                _iterator.return();
+            if (!_iteratorNormalCompletion2 && _iterator2.return) {
+                _iterator2.return();
             }
         } finally {
-            if (_didIteratorError) {
-                throw _iteratorError;
+            if (_didIteratorError2) {
+                throw _iteratorError2;
             }
         }
     }
@@ -186,13 +220,13 @@ function isHUDDirty() {
     if (players) {
         if (players.length != oldplayers.length) return true;
 
-        var _iteratorNormalCompletion2 = true;
-        var _didIteratorError2 = false;
-        var _iteratorError2 = undefined;
+        var _iteratorNormalCompletion3 = true;
+        var _didIteratorError3 = false;
+        var _iteratorError3 = undefined;
 
         try {
-            for (var _iterator2 = players[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-                var player = _step2.value;
+            for (var _iterator3 = players[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+                var player = _step3.value;
 
                 var oldplayer = _underscore2.default.findWhere(oldplayers, { id: player.id });
                 if (!oldplayer) return true;
@@ -201,16 +235,16 @@ function isHUDDirty() {
                 if (player.lifepoints != oldplayers.lifepoints) return true;
             }
         } catch (err) {
-            _didIteratorError2 = true;
-            _iteratorError2 = err;
+            _didIteratorError3 = true;
+            _iteratorError3 = err;
         } finally {
             try {
-                if (!_iteratorNormalCompletion2 && _iterator2.return) {
-                    _iterator2.return();
+                if (!_iteratorNormalCompletion3 && _iterator3.return) {
+                    _iterator3.return();
                 }
             } finally {
-                if (_didIteratorError2) {
-                    throw _iteratorError2;
+                if (_didIteratorError3) {
+                    throw _iteratorError3;
                 }
             }
         }
@@ -235,45 +269,15 @@ function updateHUD() {
 
         y = y + 40;
         renderer.drawText(ctxhud, 0, y, "Liste des joueurs: ");
-        var _iteratorNormalCompletion3 = true;
-        var _didIteratorError3 = false;
-        var _iteratorError3 = undefined;
-
-        try {
-            for (var _iterator3 = players[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-                var player = _step3.value;
-
-                var text = player.pseudo + " : " + player.score + " points";
-                y += 25;
-                renderer.drawText(ctxhud, 0, y, text);
-            }
-        } catch (err) {
-            _didIteratorError3 = true;
-            _iteratorError3 = err;
-        } finally {
-            try {
-                if (!_iteratorNormalCompletion3 && _iterator3.return) {
-                    _iterator3.return();
-                }
-            } finally {
-                if (_didIteratorError3) {
-                    throw _iteratorError3;
-                }
-            }
-        }
-
-        y += 45;
-        renderer.drawText(ctxhud, 0, y, "Highscores:");
-        if (!highscores) return;
         var _iteratorNormalCompletion4 = true;
         var _didIteratorError4 = false;
         var _iteratorError4 = undefined;
 
         try {
-            for (var _iterator4 = highscores[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-                var highscore = _step4.value;
+            for (var _iterator4 = players[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+                var player = _step4.value;
 
-                var text = highscore.pseudo + " : " + highscore.score + " points";
+                var text = player.pseudo + " : " + player.score + " points";
                 y += 25;
                 renderer.drawText(ctxhud, 0, y, text);
             }
@@ -291,49 +295,60 @@ function updateHUD() {
                 }
             }
         }
+
+        y += 45;
+        renderer.drawText(ctxhud, 0, y, "Highscores:");
+        if (!highscores) return;
+        var _iteratorNormalCompletion5 = true;
+        var _didIteratorError5 = false;
+        var _iteratorError5 = undefined;
+
+        try {
+            for (var _iterator5 = highscores[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+                var highscore = _step5.value;
+
+                var text = highscore.pseudo + " : " + highscore.score + " points";
+                y += 25;
+                renderer.drawText(ctxhud, 0, y, text);
+            }
+        } catch (err) {
+            _didIteratorError5 = true;
+            _iteratorError5 = err;
+        } finally {
+            try {
+                if (!_iteratorNormalCompletion5 && _iterator5.return) {
+                    _iterator5.return();
+                }
+            } finally {
+                if (_didIteratorError5) {
+                    throw _iteratorError5;
+                }
+            }
+        }
     }
+}
+
+function getAvatarDirection(player) {
+    console.log('avatar1' + player.direction);
+    return 'avatar1' + player.direction;
 }
 
 function renderWorld() {
     ctxfg.clearRect(0, 0, canvasfg.width, canvasfg.height);
-    var _iteratorNormalCompletion5 = true;
-    var _didIteratorError5 = false;
-    var _iteratorError5 = undefined;
-
-    try {
-        for (var _iterator5 = players[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-            var player = _step5.value;
-
-            if (player.id != myPlayerId) {
-                map.drawPlayer(ctxfg, player, player.pseudo, avatar);
-            } else {
-                map.drawPlayer(ctxfg, player, "Moi", avatar);
-            }
-        }
-    } catch (err) {
-        _didIteratorError5 = true;
-        _iteratorError5 = err;
-    } finally {
-        try {
-            if (!_iteratorNormalCompletion5 && _iterator5.return) {
-                _iterator5.return();
-            }
-        } finally {
-            if (_didIteratorError5) {
-                throw _iteratorError5;
-            }
-        }
-    }
-
     var _iteratorNormalCompletion6 = true;
     var _didIteratorError6 = false;
     var _iteratorError6 = undefined;
 
     try {
-        for (var _iterator6 = bullets[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
-            var bullet = _step6.value;
+        for (var _iterator6 = players[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+            var player = _step6.value;
 
-            map.drawBullet(ctxfg, bullet, bulletimg1);
+            if (player.id != myPlayerId) {
+                // _.findWhere(players, {id: myPlayerId});
+                map.drawPlayer(ctxfg, player, player.pseudo, _underscore2.default.findWhere(avatars, { id: getAvatarDirection(player) }));
+            } else {
+                map.drawPlayer(ctxfg, player, "Moi", _underscore2.default.findWhere(avatars, { id: getAvatarDirection(player) }));
+            }
         }
     } catch (err) {
         _didIteratorError6 = true;
@@ -346,6 +361,31 @@ function renderWorld() {
         } finally {
             if (_didIteratorError6) {
                 throw _iteratorError6;
+            }
+        }
+    }
+
+    var _iteratorNormalCompletion7 = true;
+    var _didIteratorError7 = false;
+    var _iteratorError7 = undefined;
+
+    try {
+        for (var _iterator7 = bullets[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
+            var bullet = _step7.value;
+
+            map.drawBullet(ctxfg, bullet, bulletimg1);
+        }
+    } catch (err) {
+        _didIteratorError7 = true;
+        _iteratorError7 = err;
+    } finally {
+        try {
+            if (!_iteratorNormalCompletion7 && _iterator7.return) {
+                _iterator7.return();
+            }
+        } finally {
+            if (_didIteratorError7) {
+                throw _iteratorError7;
             }
         }
     }
@@ -460,24 +500,28 @@ function processInput(player, key) {
 	if (!player) return;
 	switch (key) {
 		case 'UP_PRESSED':
+			player.direction = "up";
 			player.dirY = -1;
 			break;
 		case 'UP_RELEASED':
 			player.dirY = 0;
 			break;
 		case 'DOWN_PRESSED':
+			player.direction = "down";
 			player.dirY = 1;
 			break;
 		case 'DOWN_RELEASED':
 			player.dirY = 0;
 			break;
 		case 'LEFT_PRESSED':
+			player.direction = "left";
 			player.dirX = -1;
 			break;
 		case 'LEFT_RELEASED':
 			player.dirX = 0;
 			break;
 		case 'RIGHT_PRESSED':
+			player.direction = "right";
 			player.dirX = 1;
 			break;
 		case 'RIGHT_RELEASED':
@@ -487,6 +531,7 @@ function processInput(player, key) {
 			break;
 	}
 }
+
 exports.collide = collide;
 exports.processInput = processInput;
 
@@ -943,14 +988,12 @@ var Map = function () {
         value: function drawPlayer(canv, player, pseudo, img) {
             /* pre rendering */
             if (player.state == "dead") return;
-
             renderer.drawText(canv, player.x, player.y - 10, pseudo, "white");
             renderer.drawImg(canv, player.x, player.y, player.width, player.height, img);
         }
     }, {
         key: 'drawDeadScreen',
         value: function drawDeadScreen(canv, canvfg) {
-            //canv.clearRect(0,0,canvfg.width, canvfg.height
             canv.beginPath();
             canv.rect(0, 0, canvfg.width, canvfg.height);
             canv.fillStyle = "black";
@@ -964,7 +1007,7 @@ var Map = function () {
     }, {
         key: 'drawWall',
         value: function drawWall(canv, wall) {
-            renderer.drawElement(canv, wall.x, wall.y, wall.height, wall.width, "Tile.png");
+            renderer.drawElement(canv, wall.x, wall.y, wall.height, wall.width, "./img/Tile.png");
         }
     }]);
 
@@ -20767,6 +20810,7 @@ var Player = function () {
         this.y = 0;
         this.dirX = 0;
         this.dirY = 0;
+        this.direction = "down";
         this.width = 24;
         this.height = 30;
         //this.bonus = new Bonus();
@@ -20808,14 +20852,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 function drawElement(canv, x, y, width, height, color) {
-  /*
-  ctxbg.beginPath();
-  ctxbg.rect(x, y, width, height);
-  ctxbg.fillStyle = color;
-  ctxbg.fill();
-  ctxbg.closePath();
-  */
-
   var img = new Image();
   img.onload = function () {
     canv.drawImage(img, x, y);

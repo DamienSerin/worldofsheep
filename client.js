@@ -28,8 +28,10 @@ tmp_canvas.height = 600;
 */
 
 let lifeimg = document.getElementById('lifepoints');
-let avatar = document.getElementById('avatarface1');
+let avatar = document.getElementById('avatar1down');
 let bulletimg1 = document.getElementById('bullet1');
+
+let avatars = [];
 
 let dead = false;
 let myPlayerId = -1;
@@ -40,7 +42,18 @@ let map = new Map();
 let highscores = null;
 let pseudo;
 
+function initImg(){
+    let dir = ["up", "down", "left", "right"];
+    
+    for (let d of dir){
+        avatars.push(document.getElementById('avatar1'+d));
+    }
+    
+    //avatars.push(document.getElementById('avatar1down'));
+   // console.log(avatars[0].id);
+}
 socket.on('playerInit', function(args){
+    initImg();
     myPlayerId = args.id;
     convertNewWorld(args);
     /*gestion de la map a l'initialisation*/
@@ -147,15 +160,20 @@ function updateHUD(){
     }
 }
 
+function getAvatarDirection(player){
+    console.log('avatar1' + player.direction);
+    return 'avatar1' + player.direction;
+}
 
 function renderWorld(){
     ctxfg.clearRect(0, 0, canvasfg.width, canvasfg.height);
     for(let player of players){
         if (player.id != myPlayerId){
-            map.drawPlayer(ctxfg, player, player.pseudo, avatar);
+           // _.findWhere(players, {id: myPlayerId});
+            map.drawPlayer(ctxfg, player, player.pseudo, _.findWhere(avatars, {id: getAvatarDirection(player)}));
         }
         else{
-            map.drawPlayer(ctxfg, player, "Moi", avatar);
+            map.drawPlayer(ctxfg, player, "Moi", _.findWhere(avatars, {id: getAvatarDirection(player)}));
         }
     }
 

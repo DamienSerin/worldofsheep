@@ -1,13 +1,5 @@
 
   function drawElement(canv, x, y, width, height, color){
-        /*
-        ctxbg.beginPath();
-        ctxbg.rect(x, y, width, height);
-        ctxbg.fillStyle = color;
-        ctxbg.fill();
-        ctxbg.closePath();
-        */
-
         var img = new Image();
         img.onload = function () {
             canv.drawImage(img, x, y);
@@ -28,6 +20,7 @@
       ctx.fillText(text, x, y);
         
     }
+    
 
 export {
   drawElement,
