@@ -57,19 +57,30 @@ var _map = require('./map.js');
 
 var _bullet = require('./bullet.js');
 
+var _renderer = require('./renderer.js');
+
+var renderer = _interopRequireWildcard(_renderer);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var $ = require("jquery");
 var socket = require('socket.io-client')();
 
+
+/* pour tester: https://worldofsheep-sandra-laduranti.c9users.io:8080*/
+
 /* Canvas pour afficher le background de la map qui n'a besoin d'être dessiné qu'une seule fois */
 var canvasbg = document.getElementById('canvasbg');
 /* Canvas pour afficher le foreground (éléments dynamiques) */
 var canvasfg = document.getElementById('canvasfg');
+/* Canvas pour toute la partie HUD*/
+var canvasHUD = document.getElementById('HUD');
 
 var ctxbg = canvasbg.getContext('2d');
 var ctxfg = canvasfg.getContext('2d');
-
+var ctxhud = canvasHUD.getContext('2d');
 /* Canvas for pre-rendering */
 /*const tmp_canvas = document.createElement('canvas');
 const tmp_ctx = tmp_canvas.getContext('2d');
@@ -79,6 +90,7 @@ tmp_canvas.height = 600;
 
 var dead = false;
 var myPlayerId = -1;
+var oldplayers = null;
 var players = null;
 var bullets = null;
 var map = new _map.Map();
@@ -87,8 +99,13 @@ var pseudo = void 0;
 socket.on('playerInit', function (args) {
     myPlayerId = args.id;
     convertNewWorld(args);
+    /*gestion de la map a l'initialisation*/
+    var tmp = JSON.parse(args.map);
+    map.walls = tmp.walls;
+    map.spawns = tmp.spawns;
 
-    /* pseudo = prompt("Veuillez saisir votre pseudo pour jouer:","Bob");
+    /* A TESTER AUTRE PART QUE SUR VM CACA 
+    pseudo = prompt("Veuillez saisir votre pseudo pour jouer:","Bob");
     if(pseudo!=null && pseudo!="Bob"){
        console.log("nom different");
        socket.emit('setPseudo', {pseudo : pseudo});
@@ -129,7 +146,9 @@ socket.on('updateWorld', function (nWorld) {
     }
 });
 
-function updateListHighscore() {}
+socket.on('death', function () {
+    death();
+});
 
 function updateListPlayer() {
     _underscore2.default.sortBy(players, 'score');
@@ -183,42 +202,74 @@ function death() {
     return false;
 }
 
-function renderWorld() {
-    ctxfg.clearRect(0, 0, canvasfg.width, canvasfg.height);
-    var _iteratorNormalCompletion3 = true;
-    var _didIteratorError3 = false;
-    var _iteratorError3 = undefined;
+function isHUDDirty() {
+    var dirty = false;
 
-    try {
-        for (var _iterator3 = players[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-            var player = _step3.value;
+    /* first iteration*/
+    if (!oldplayers) return true;
 
-            map.drawPlayer(ctxfg, player);
-        }
-    } catch (err) {
-        _didIteratorError3 = true;
-        _iteratorError3 = err;
-    } finally {
+    if (players) {
+        if (players.length != oldplayers.length) return true;
+
+        var _iteratorNormalCompletion3 = true;
+        var _didIteratorError3 = false;
+        var _iteratorError3 = undefined;
+
         try {
-            if (!_iteratorNormalCompletion3 && _iterator3.return) {
-                _iterator3.return();
+            for (var _iterator3 = players[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+                var player = _step3.value;
+
+                var oldplayer = _underscore2.default.findWhere(oldplayers, { id: player.id });
+                if (!oldplayer) return true;
+                if (player.score != oldplayer.score) return true;
+                if (player.pseudo != oldplayer.pseudo) return true;
             }
+        } catch (err) {
+            _didIteratorError3 = true;
+            _iteratorError3 = err;
         } finally {
-            if (_didIteratorError3) {
-                throw _iteratorError3;
+            try {
+                if (!_iteratorNormalCompletion3 && _iterator3.return) {
+                    _iterator3.return();
+                }
+            } finally {
+                if (_didIteratorError3) {
+                    throw _iteratorError3;
+                }
             }
         }
     }
 
+    return dirty;
+}
+
+function updateHUD() {
+    var dirty = false;
+
+    dirty = isHUDDirty();
+
+    if (dirty) {
+        ctxhud.clearRect(0, 0, canvasHUD.width, canvasHUD.height);
+
+        for (var index in players) {
+            var player = players[index];
+            var text = player.pseudo + " : " + player.score + " points";
+            renderer.drawText(ctxhud, 0, index * 12 + 12, text);
+        }
+    }
+}
+
+function renderWorld() {
+    ctxfg.clearRect(0, 0, canvasfg.width, canvasfg.height);
     var _iteratorNormalCompletion4 = true;
     var _didIteratorError4 = false;
     var _iteratorError4 = undefined;
 
     try {
-        for (var _iterator4 = bullets[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-            var bullet = _step4.value;
+        for (var _iterator4 = players[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+            var player = _step4.value;
 
-            map.drawBullet(ctxfg, bullet);
+            map.drawPlayer(ctxfg, player);
         }
     } catch (err) {
         _didIteratorError4 = true;
@@ -235,19 +286,39 @@ function renderWorld() {
         }
     }
 
-    console.log("LIFEPOINT");
-    var myPlayer = _underscore2.default.findWhere(players, { id: myPlayerId });
-    $("#lifePoints").html("<b>  " + _underscore2.default.findWhere(players, { id: myPlayerId }).lifepoints + "</b>");
+    var _iteratorNormalCompletion5 = true;
+    var _didIteratorError5 = false;
+    var _iteratorError5 = undefined;
 
-    updateListPlayer();
+    try {
+        for (var _iterator5 = bullets[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+            var bullet = _step5.value;
+
+            map.drawBullet(ctxfg, bullet);
+        }
+    } catch (err) {
+        _didIteratorError5 = true;
+        _iteratorError5 = err;
+    } finally {
+        try {
+            if (!_iteratorNormalCompletion5 && _iterator5.return) {
+                _iterator5.return();
+            }
+        } finally {
+            if (_didIteratorError5) {
+                throw _iteratorError5;
+            }
+        }
+    }
+
+    updateHUD();
 }
 
 function convertNewWorld(nWorld) {
+    oldplayers = players;
     players = JSON.parse(nWorld.players);
-    var tmp = JSON.parse(nWorld.map);
+    //let tmp = JSON.parse(nWorld.map);
     bullets = JSON.parse(nWorld.bullets);
-    map.walls = tmp.walls;
-    map.spawns = tmp.spawns;
 }
 
 $(document).on('keydown', function (event) {
@@ -318,7 +389,7 @@ if(pseudo!=null){
 console.log("pseudo: "+ pseudo)
 */
 
-},{"./bullet.js":1,"./game.js":5,"./map.js":6,"jquery":36,"socket.io-client":42,"underscore":58}],3:[function(require,module,exports){
+},{"./bullet.js":1,"./game.js":5,"./map.js":6,"./renderer.js":62,"jquery":36,"socket.io-client":42,"underscore":58}],3:[function(require,module,exports){
 module.exports={
     "map1" : [
     ["W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W"],
@@ -429,6 +500,11 @@ var Game = function () {
             return _underscore2.default.findWhere(this.players, { id: playerId });
         }
     }, {
+        key: 'getSocket',
+        value: function getSocket(playerId) {
+            return _underscore2.default.findWhere(this.sockets, { id: this.getPlayer(playerId).socketId });
+        }
+    }, {
         key: 'addPlayer',
         value: function addPlayer(playerId) {
             if (this.getPlayer(playerId)) {
@@ -437,6 +513,12 @@ var Game = function () {
             var player = new _player.Player(playerId);
             this.players.push(player);
             return player;
+        }
+    }, {
+        key: 'addSocket',
+        value: function addSocket(socket, playerId) {
+            this.sockets.push(socket);
+            this.getPlayer(playerId).setSocketId(socket.id);
         }
     }, {
         key: 'addBullet',
@@ -452,6 +534,7 @@ var Game = function () {
     }, {
         key: 'removePlayer',
         value: function removePlayer(player) {
+            this.sockets = _underscore2.default.without(this.sockets, this.getSocket(player.id));
             this.players = _underscore2.default.without(this.players, player);
         }
     }, {
@@ -563,6 +646,8 @@ var Game = function () {
         value: function onDeath(player) {
             this.checkForHighScores(player);
             player.state = "dead";
+            this.getSocket(player.id).emit("death", {});
+            //  this.removePlayer(player);
         }
     }, {
         key: 'updatePlayer',
@@ -769,8 +854,15 @@ exports.Game = Game;
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+exports.Map = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _renderer = require('./renderer.js');
+
+var renderer = _interopRequireWildcard(_renderer);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -812,23 +904,6 @@ var Map = function () {
             }
         }
     }, {
-        key: 'drawElement',
-        value: function drawElement(canv, x, y, width, height, color) {
-            /*
-            ctxbg.beginPath();
-            ctxbg.rect(x, y, width, height);
-            ctxbg.fillStyle = color;
-            ctxbg.fill();
-            ctxbg.closePath();
-            */
-
-            var img = new Image();
-            img.onload = function () {
-                canv.drawImage(img, x, y);
-            };
-            img.src = color;
-        }
-    }, {
         key: 'drawBullet',
         value: function drawBullet(canv, bullet) {
             canv.beginPath();
@@ -849,6 +924,7 @@ var Map = function () {
             canv.fillStyle = "green";
             canv.fill();
             canv.closePath();
+            //this.drawElement(canv, player.x,player.y,player.width, player.height, "life.png");
         }
     }, {
         key: 'drawDeadScreen',
@@ -861,7 +937,7 @@ var Map = function () {
     }, {
         key: 'drawWall',
         value: function drawWall(canv, wall) {
-            this.drawElement(canv, wall.x, wall.y, wall.height, wall.width, "Tile.png");
+            renderer.drawElement(canv, wall.x, wall.y, wall.height, wall.width, "Tile.png");
         }
     }]);
 
@@ -870,7 +946,7 @@ var Map = function () {
 
 exports.Map = Map;
 
-},{}],7:[function(require,module,exports){
+},{"./renderer.js":62}],7:[function(require,module,exports){
 module.exports = after
 
 function after(count, callback, err_cb) {
@@ -20655,6 +20731,7 @@ var Player = function () {
         _classCallCheck(this, Player);
 
         this.id = playerId;
+        this.socketId = "";
         this.pseudo = "Bob" + playerId;
         this.state = "alive";
         this.score = 0;
@@ -20671,6 +20748,16 @@ var Player = function () {
     }
 
     _createClass(Player, [{
+        key: "setPseudo",
+        value: function setPseudo(pseudo) {
+            this.pseudo = pseudo;
+        }
+    }, {
+        key: "setSocketId",
+        value: function setSocketId(socketId) {
+            this.socketId = socketId;
+        }
+    }, {
         key: "getTouched",
         value: function getTouched(bullet) {
             this.lifepoints -= bullet.dammage;
@@ -20685,16 +20772,44 @@ var Player = function () {
         value: function isDead() {
             return this.lifepoints <= 0;
         }
-    }, {
-        key: "setPseudo",
-        value: function setPseudo(pseudo) {
-            this.pseudo = pseudo;
-        }
     }]);
 
     return Player;
 }();
 
 exports.Player = Player;
+
+},{}],62:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+function drawElement(canv, x, y, width, height, color) {
+  /*
+  ctxbg.beginPath();
+  ctxbg.rect(x, y, width, height);
+  ctxbg.fillStyle = color;
+  ctxbg.fill();
+  ctxbg.closePath();
+  */
+
+  var img = new Image();
+  img.onload = function () {
+    canv.drawImage(img, x, y);
+  };
+  img.src = color;
+}
+
+function drawText(ctx, x, y, text, color) {
+  color = color ? color : "black";
+  ctx.fillStyle = color;
+  //ctx.textAlign = "center";
+  ctx.fillText(text, x, y);
+}
+
+exports.drawElement = drawElement;
+exports.drawText = drawText;
 
 },{}]},{},[2]);

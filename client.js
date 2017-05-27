@@ -4,14 +4,20 @@ const socket = require('socket.io-client')();
 import {Game} from './game.js';
 import {Map} from './map.js';
 import {Bullet} from './bullet.js';
+import * as renderer from './renderer.js';
+
+/* pour tester: https://worldofsheep-sandra-laduranti.c9users.io:8080*/
+
 /* Canvas pour afficher le background de la map qui n'a besoin d'être dessiné qu'une seule fois */
 const canvasbg = document.getElementById('canvasbg');
 /* Canvas pour afficher le foreground (éléments dynamiques) */
 const canvasfg = document.getElementById('canvasfg');
+/* Canvas pour toute la partie HUD*/
+const canvasHUD = document.getElementById('HUD');
 
 const ctxbg = canvasbg.getContext('2d');
 const ctxfg = canvasfg.getContext('2d');
-
+const ctxhud = canvasHUD.getContext('2d');
 /* Canvas for pre-rendering */
 /*const tmp_canvas = document.createElement('canvas');
 const tmp_ctx = tmp_canvas.getContext('2d');
@@ -21,16 +27,20 @@ tmp_canvas.height = 600;
 
 let dead = false;
 let myPlayerId = -1;
+let oldplayers = null;
 let players = null;
 let bullets = null;
 let map = new Map();
 let pseudo;
 
-
 socket.on('playerInit', function(args){
     myPlayerId = args.id;
     convertNewWorld(args);
-
+    /*gestion de la map a l'initialisation*/
+    let tmp = JSON.parse(args.map);
+    map.walls = tmp.walls;
+    map.spawns = tmp.spawns;
+    
    /* A TESTER AUTRE PART QUE SUR VM CACA 
    pseudo = prompt("Veuillez saisir votre pseudo pour jouer:","Bob");
    if(pseudo!=null && pseudo!="Bob"){
@@ -51,9 +61,10 @@ socket.on('updateWorld', function(nWorld){
     }
 });
 
-function updateListHighscore(){
+socket.on('death', function(){
+    death();
+})
 
-}
 
 function updateListPlayer(){
   _.sortBy(players,'score');
@@ -87,6 +98,46 @@ function death(){
   return false;
 }
 
+function isHUDDirty(){
+    let dirty = false;
+    
+    /* first iteration*/
+    if (!oldplayers) return true;
+    
+    if (players) {
+        if (players.length != oldplayers.length) return true;
+        
+        for(let player of players){
+            let oldplayer = _.findWhere(oldplayers, {id: player.id});
+            if (!oldplayer) return true;
+            if (player.score != oldplayer.score) return true;
+            if (player.pseudo != oldplayer.pseudo) return true;
+        }
+        
+    }
+
+    
+    return dirty;
+}
+
+function updateHUD(){
+    let dirty = false;
+    
+    dirty = isHUDDirty();
+    
+    if (dirty){
+        ctxhud.clearRect(0,0,canvasHUD.width, canvasHUD.height);
+        
+        for(let index in players){
+            let player = players[index];
+            let text = player.pseudo + " : " + player.score +" points";
+            renderer.drawText(ctxhud,0,index*12+12,text);
+        }
+        
+    }
+}
+
+
 function renderWorld(){
     ctxfg.clearRect(0, 0, canvasfg.width, canvasfg.height);
     for(let player of players){
@@ -96,19 +147,16 @@ function renderWorld(){
     for(let bullet of bullets){
         map.drawBullet(ctxfg, bullet);
     }
-
-    /* affiche la vie qu'il reste au joueur*/
-   $("#lifePoints").html("<b>  "+ _.findWhere(players, {id: myPlayerId} ).lifepoints+"</b>");
-
-    updateListPlayer();
+    
+    updateHUD();
 }
 
 function convertNewWorld(nWorld){
+    oldplayers = players;
     players = JSON.parse(nWorld.players);
-    let tmp = JSON.parse(nWorld.map);
+    //let tmp = JSON.parse(nWorld.map);
     bullets = JSON.parse(nWorld.bullets);
-    map.walls = tmp.walls;
-    map.spawns = tmp.spawns;
+  
 }
 
 $(document).on('keydown', function(event){

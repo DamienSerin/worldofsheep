@@ -1,13 +1,4 @@
-#joueurs{
-  position: absolute;
-  left: 1010px;
-  width: 500px;
-  height: 600px;
-}
 
-#stat{
-  height:25px;
-}
 
 #canvasbg{
   position: absolute;
@@ -19,13 +10,9 @@
   z-index: 0;
 }
 
-#canv{
-  position: relative;
-   width: 1000;
-   height: 600;
-}
-
-.flotte {
-float:left;
+#HUD{
+  position: absolute;
+  z-index: 0;
+  left: 1010px;
 }
 

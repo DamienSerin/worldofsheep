@@ -18,6 +18,10 @@ class Game {
     getPlayer(playerId){
         return _.findWhere(this.players, {id: playerId});
     }
+    
+    getSocket(playerId){
+        return _.findWhere(this.sockets, {id: this.getPlayer(playerId).socketId});
+    }
 
     addPlayer(playerId){
         if(this.getPlayer(playerId)){
@@ -27,6 +31,11 @@ class Game {
         this.players.push(player);
         return player;
     }
+    
+    addSocket(socket, playerId){
+        this.sockets.push(socket);
+        this.getPlayer(playerId).setSocketId(socket.id);
+    }
 
     addBullet(arg){
         let bullet = new Bullet(arg.idOwner, arg.x, arg.y, arg.dirX, arg.dirY);
@@ -34,10 +43,11 @@ class Game {
     }
 
     removeBullet(bullet){
-        this.bullets = _.without(this.bullets, bullet);
+          this.bullets = _.without(this.bullets, bullet);
     }
 
     removePlayer(player){
+        this.sockets = _.without(this.sockets, this.getSocket(player.id));
         this.players = _.without(this.players, player);
     }
 
@@ -83,6 +93,8 @@ class Game {
     onDeath(player){
         this.checkForHighScores(player);
         player.state = "dead";
+        this.getSocket(player.id).emit("death",{});
+      //  this.removePlayer(player);
     }
 
     updatePlayer(player){

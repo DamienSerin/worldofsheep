@@ -14,20 +14,21 @@ import {Game} from './game.js';
 app.use(express.static('public'));
 
 const game = new Game();
-//console.log(game.map.walls);
 
 var nextPlayerId = 1;
 
 
-/* ACTUELLEMENT NE SUPPORTE PAS PLUS DE CONNECTES SIMULTANES*/ 
+/* ACTUELLEMENT NE SUPPORTE PAS PLUS DE 3 CONNECTES SIMULTANES*/ 
 io.sockets.on('connection', socket => {
-    //console.log("salut");
-    //console.log(io.sockets);
+
     let playerId = nextPlayerId;
     nextPlayerId++;
     game.placePlayer(playerId);
-    game.sockets.push(socket);
+    //game.sockets.push(socket);
+    game.addSocket(socket, playerId);
     socket.emit('playerInit', {id: playerId, players: JSON.stringify(game.players), map: JSON.stringify(game.map), bullets: JSON.stringify(game.bullets)});
+    //console.log(socket.id);
+    //console.log(game.getSocket(playerId));
 
     socket.on('input', function(userInput){
         engine.processInput(game.getPlayer(userInput.id), userInput.key);
@@ -54,8 +55,9 @@ io.sockets.on('connection', socket => {
 
 function gameLoop(){
     game.updateWorld();
-    io.emit('updateWorld', {players: JSON.stringify(game.players), map: JSON.stringify(game.map), bullets: JSON.stringify(game.bullets)});
+    io.emit('updateWorld', {players: JSON.stringify(game.players), bullets: JSON.stringify(game.bullets)});
     game.removeDead();
+    //console.log(game.sockets.id);
 }
 setInterval(gameLoop, 0.03);
 

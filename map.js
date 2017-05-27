@@ -1,3 +1,5 @@
+import * as renderer from './renderer.js';
+
 class Map{
     constructor(){
         this.walls = [ ];
@@ -30,22 +32,8 @@ class Map{
         }
     }
 
-    drawElement(canv, x, y, width, height, color){
-        /*
-        ctxbg.beginPath();
-        ctxbg.rect(x, y, width, height);
-        ctxbg.fillStyle = color;
-        ctxbg.fill();
-        ctxbg.closePath();
-        */
-
-        var img = new Image();
-        img.onload = function () {
-            canv.drawImage(img, x, y);
-        }
-        img.src = color;
-    }
-
+  
+    
 
     drawBullet(canv, bullet){
         canv.beginPath();
@@ -65,6 +53,7 @@ class Map{
         canv.fillStyle = "green";
         canv.fill();
         canv.closePath();
+        //this.drawElement(canv, player.x,player.y,player.width, player.height, "life.png");
     }
 
     drawDeadScreen(canv, canvfg){
@@ -75,7 +64,7 @@ class Map{
     }
 
     drawWall(canv, wall){
-        this.drawElement(canv, wall.x, wall.y, wall.height, wall.width, "Tile.png");
+        renderer.drawElement(canv, wall.x, wall.y, wall.height, wall.width, "Tile.png");
     }
 }
 
