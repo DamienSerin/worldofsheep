@@ -7,7 +7,7 @@ import * as engine from './engine.js';
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIO.listen(server);
+const io = new socketIO(server, {pingInterval: 5000, pingTimeout: 11000});
 
 import {Game} from './game.js';
 
@@ -53,13 +53,21 @@ io.sockets.on('connection', socket => {
 
 /* A ajouter => Pour optimiser, voir pour envoyer un message de refresh des highscores seulement quand un nouvel highscore est enregistré*/
 
+
+
+
 function gameLoop(){
     game.updateWorld();
     io.emit('updateWorld', {players: JSON.stringify(game.players), bullets: JSON.stringify(game.bullets)});
     game.removeDead();
     //console.log(game.sockets.id);
 }
-setInterval(gameLoop, 0.03);
+setInterval(gameLoop, 0.09);
+
+/*function emitLoop(){
+    io.emit('updateWorld', {players: JSON.stringify(game.players), bullets: JSON.stringify(game.bullets)});
+}
+setInterval(gameLoop, 60);*/
 
 server.listen(8080 , function(){
     console.log('Server listening on port 4000!');
