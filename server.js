@@ -24,11 +24,8 @@ io.sockets.on('connection', socket => {
     let playerId = nextPlayerId;
     nextPlayerId++;
     game.placePlayer(playerId);
-    //game.sockets.push(socket);
-    game.addSocket(socket, playerId);
     socket.emit('playerInit', {id: playerId, players: JSON.stringify(game.players), map: JSON.stringify(game.map), bullets: JSON.stringify(game.bullets)});
-    //console.log(socket.id);
-    //console.log(game.getSocket(playerId));
+
 
     socket.on('input', function(userInput){
         engine.processInput(game.getPlayer(userInput.id), userInput.key);
@@ -51,23 +48,13 @@ io.sockets.on('connection', socket => {
 
 });
 
-/* A ajouter => Pour optimiser, voir pour envoyer un message de refresh des highscores seulement quand un nouvel highscore est enregistré*/
-
-
-
-
 function gameLoop(){
     game.updateWorld();
-    io.emit('updateWorld', {players: JSON.stringify(game.players), bullets: JSON.stringify(game.bullets)});
+    io.emit('updateWorld', {players: JSON.stringify(game.players), bullets: JSON.stringify(game.bullets), highscores: JSON.stringify(game.highscores)});
     game.removeDead();
-    //console.log(game.sockets.id);
 }
 setInterval(gameLoop, 0.09);
 
-/*function emitLoop(){
-    io.emit('updateWorld', {players: JSON.stringify(game.players), bullets: JSON.stringify(game.bullets)});
-}
-setInterval(gameLoop, 60);*/
 
 server.listen(8080 , function(){
     console.log('Server listening on port 4000!');

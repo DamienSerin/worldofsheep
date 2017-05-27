@@ -8,7 +8,6 @@ import * as engine from './engine.js';
 class Game {
     constructor(){
         this.players = [ ];
-        this.sockets = [ ];
         this.bullets = [ ];
         this.highscores = [ ];
         this.map = new Map();
@@ -19,9 +18,6 @@ class Game {
         return _.findWhere(this.players, {id: playerId});
     }
     
-    getSocket(playerId){
-        return _.findWhere(this.sockets, {id: this.getPlayer(playerId).socketId});
-    }
 
     addPlayer(playerId){
         if(this.getPlayer(playerId)){
@@ -32,10 +28,6 @@ class Game {
         return player;
     }
     
-    addSocket(socket, playerId){
-        this.sockets.push(socket);
-        this.getPlayer(playerId).setSocketId(socket.id);
-    }
 
     addBullet(arg){
         let bullet = new Bullet(arg.idOwner, arg.x, arg.y, arg.dirX, arg.dirY);
@@ -47,7 +39,6 @@ class Game {
     }
 
     removePlayer(player){
-        this.sockets = _.without(this.sockets, this.getSocket(player.id));
         this.players = _.without(this.players, player);
     }
 
@@ -79,22 +70,25 @@ class Game {
     }
 
     checkForHighScores(player){
+        if (this.highscores.length <= 0){
+            this.highscores.push({pseudo: player.pseudo, player: player.id, score: player.score});
+        }
         for(let score of this.highscores){
             if(player.score > score.score){
                 let tmp = this.highscores.indexOf(score);
-                this.highscores.splice(tmp, 0, {player: player.id, score: player.score});
+                this.highscores.splice(tmp, 0, {pseudo: player.pseudo, player: player.id, score: player.score});
                 if(this.highscores.length > 20){
                     this.highscores.pop();
                 }
+                return;
             }
         }
     }
 
     onDeath(player){
+        if (!player) return;
         this.checkForHighScores(player);
         player.state = "dead";
-        this.getSocket(player.id).emit("death",{});
-      //  this.removePlayer(player);
     }
 
     updatePlayer(player){
@@ -123,6 +117,7 @@ class Game {
                 return;
             }
         }
+        
     }
 
     updateBullet(bullet){

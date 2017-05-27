@@ -3,6 +3,7 @@ function collide(obj1, player){
 }
 
 function processInput(player, key){
+	if (!player) return;
 	switch(key) {
 		case 'UP_PRESSED':
 			player.dirY = -1;

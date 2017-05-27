@@ -1,7 +1,6 @@
 class Player {
     constructor(playerId) {
         this.id = playerId;
-        this.socketId = "";
         this.pseudo = "Bob" + playerId;
         this.state = "alive";
         this.score = 0;
@@ -11,8 +10,8 @@ class Player {
         this.y = 0;
         this.dirX = 0;
         this.dirY = 0;
-        this.width = 20;
-        this.height = 20;
+        this.width = 24;
+        this.height = 30;
         //this.bonus = new Bonus();
         //this.malus = new Malus();
     }
@@ -21,9 +20,6 @@ class Player {
       this.pseudo = pseudo;
     }
     
-    setSocketId(socketId){
-        this.socketId = socketId;
-    }
 
     getTouched(bullet){
         this.lifepoints -= bullet.dammage;

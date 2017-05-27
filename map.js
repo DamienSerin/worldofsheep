@@ -35,30 +35,29 @@ class Map{
   
     
 
-    drawBullet(canv, bullet){
-        canv.beginPath();
-        canv.rect(bullet.x, bullet.y, bullet.width, bullet.height);
-        canv.fillStyle = "white";
-        canv.fill();
-        canv.closePath();
+    drawBullet(canv, bullet, img){
+        renderer.drawImg(canv, bullet.x,bullet.y,bullet.width, bullet.height, img);
     }
 
-    drawPlayer(canv, player) {
-        //var player = environment.players[playerId];
-
+    drawPlayer(canv, player, pseudo, img) {
         /* pre rendering */
         if (player.state == "dead") return;
-        canv.beginPath();
-        canv.rect(player.x, player.y, player.width, player.height);
-        canv.fillStyle = "green";
-        canv.fill();
-        canv.closePath();
-        //this.drawElement(canv, player.x,player.y,player.width, player.height, "life.png");
+        
+        renderer.drawText(canv, player.x, player.y-10, pseudo, "white");
+        renderer.drawImg(canv, player.x,player.y,player.width, player.height, img);
     }
 
+
+
     drawDeadScreen(canv, canvfg){
-      canv.clearRect(0,0,canvfg.width, canvfg.height);
+      //canv.clearRect(0,0,canvfg.width, canvfg.height
+       canv.beginPath();
+        canv.rect(0, 0, canvfg.width, canvfg.height);
+        canv.fillStyle = "black";
+        canv.fill();
+        canv.closePath();
       canv.fillStyle = "red";
+      canv.font="50px OptimusPrinceps";
       canv.textAlign = "center";
       canv.fillText("YOU DIED", (canvfg.width)/2, (canvfg.height)/2);
     }

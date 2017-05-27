@@ -8,8 +8,8 @@ class Bullet {
 	    this.scoreIncrease = 1;
 	    this.x = x;
 	    this.y = y;
-	    this.width = 10;
-	    this.height = 10;
+	    this.width = 15;
+	    this.height = 15;
 	    this.dirX = dirX;
 	    this.dirY = dirY;
 	}

@@ -5,6 +5,7 @@ import {Game} from './game.js';
 import {Map} from './map.js';
 import {Bullet} from './bullet.js';
 import * as renderer from './renderer.js';
+import * as engine from './engine.js';
 
 /* pour tester: https://worldofsheep-sandra-laduranti.c9users.io:8080*/
 
@@ -18,6 +19,7 @@ const canvasHUD = document.getElementById('HUD');
 const ctxbg = canvasbg.getContext('2d');
 const ctxfg = canvasfg.getContext('2d');
 const ctxhud = canvasHUD.getContext('2d');
+ctxhud.font = "20px Arial";
 /* Canvas for pre-rendering */
 /*const tmp_canvas = document.createElement('canvas');
 const tmp_ctx = tmp_canvas.getContext('2d');
@@ -25,12 +27,17 @@ tmp_canvas.width = 1000;
 tmp_canvas.height = 600;
 */
 
+let lifeimg = document.getElementById('lifepoints');
+let avatar = document.getElementById('avatarface1');
+let bulletimg1 = document.getElementById('bullet1');
+
 let dead = false;
 let myPlayerId = -1;
 let oldplayers = null;
 let players = null;
 let bullets = null;
 let map = new Map();
+let highscores = null;
 let pseudo;
 
 socket.on('playerInit', function(args){
@@ -56,6 +63,7 @@ socket.on('playerInit', function(args){
 
 socket.on('updateWorld', function(nWorld){
     convertNewWorld(nWorld);
+    highscores = JSON.parse(nWorld.highscores);
     if (!death()){
       renderWorld();
     }
@@ -66,22 +74,6 @@ socket.on('death', function(){
 })
 
 
-function updateListPlayer(){
-  _.sortBy(players,'score');
-
-  let listPlayer = "";
-  for(let player of players){
-      if (player.id != myPlayerId){
-        listPlayer += "<li>"+player.pseudo+" : "+player.score+" points</li>";
-      }
-      else{
-        listPlayer += "<li>Moi : "+player.score+" points</li>";
-      }
-  }
-
-  $("#ingamelist").html(listPlayer);
-}
-
 function death(){
   let player = _.findWhere(players, {id: myPlayerId});
 
@@ -91,7 +83,6 @@ function death(){
     $(document).off("keyup");
     $(document).off("mousedown");
     dead = true;
-    socket.close();
     map.drawDeadScreen(ctxfg, canvasfg);
     return true;
   }
@@ -112,6 +103,7 @@ function isHUDDirty(){
             if (!oldplayer) return true;
             if (player.score != oldplayer.score) return true;
             if (player.pseudo != oldplayer.pseudo) return true;
+            if (player.lifepoints != oldplayers.lifepoints) return true;
         }
         
     }
@@ -126,12 +118,29 @@ function updateHUD(){
     dirty = isHUDDirty();
     
     if (dirty){
+        let y = 5;
+        players = _.sortBy(players,'score');
         ctxhud.clearRect(0,0,canvasHUD.width, canvasHUD.height);
         
-        for(let index in players){
-            let player = players[index];
+       
+        //x,y
+        renderer.drawImg(ctxhud,0,5,20,20,lifeimg);
+        renderer.drawText(ctxhud, 24,20, _.findWhere(players, {id: myPlayerId}).lifepoints);
+
+        y = y + 40;
+        renderer.drawText(ctxhud,0,y, "Liste des joueurs: ")
+        for(let player of players){
             let text = player.pseudo + " : " + player.score +" points";
-            renderer.drawText(ctxhud,0,index*12+12,text);
+            y += 25;
+            renderer.drawText(ctxhud,0,y,text);
+        }
+        y += 45;
+        renderer.drawText(ctxhud,0,y, "Highscores:")
+        if(!highscores) return;
+        for(let highscore of highscores ){
+            let text = highscore.pseudo + " : " + highscore.score + " points";
+            y+=25;
+            renderer.drawText(ctxhud,0,y,text);
         }
         
     }
@@ -141,11 +150,16 @@ function updateHUD(){
 function renderWorld(){
     ctxfg.clearRect(0, 0, canvasfg.width, canvasfg.height);
     for(let player of players){
-        map.drawPlayer(ctxfg, player);
+        if (player.id != myPlayerId){
+            map.drawPlayer(ctxfg, player, player.pseudo, avatar);
+        }
+        else{
+            map.drawPlayer(ctxfg, player, "Moi", avatar);
+        }
     }
 
     for(let bullet of bullets){
-        map.drawBullet(ctxfg, bullet);
+        map.drawBullet(ctxfg, bullet, bulletimg1);
     }
     
     updateHUD();
@@ -156,7 +170,6 @@ function convertNewWorld(nWorld){
     players = JSON.parse(nWorld.players);
     //let tmp = JSON.parse(nWorld.map);
     bullets = JSON.parse(nWorld.bullets);
-  
 }
 
 $(document).on('keydown', function(event){

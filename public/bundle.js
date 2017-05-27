@@ -26,8 +26,8 @@ var Bullet = function () {
 		this.scoreIncrease = 1;
 		this.x = x;
 		this.y = y;
-		this.width = 10;
-		this.height = 10;
+		this.width = 15;
+		this.height = 15;
 		this.dirX = dirX;
 		this.dirY = dirY;
 	}
@@ -61,6 +61,10 @@ var _renderer = require('./renderer.js');
 
 var renderer = _interopRequireWildcard(_renderer);
 
+var _engine = require('./engine.js');
+
+var engine = _interopRequireWildcard(_engine);
+
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -81,6 +85,7 @@ var canvasHUD = document.getElementById('HUD');
 var ctxbg = canvasbg.getContext('2d');
 var ctxfg = canvasfg.getContext('2d');
 var ctxhud = canvasHUD.getContext('2d');
+ctxhud.font = "20px Arial";
 /* Canvas for pre-rendering */
 /*const tmp_canvas = document.createElement('canvas');
 const tmp_ctx = tmp_canvas.getContext('2d');
@@ -88,12 +93,17 @@ tmp_canvas.width = 1000;
 tmp_canvas.height = 600;
 */
 
+var lifeimg = document.getElementById('lifepoints');
+var avatar = document.getElementById('avatarface1');
+var bulletimg1 = document.getElementById('bullet1');
+
 var dead = false;
 var myPlayerId = -1;
 var oldplayers = null;
 var players = null;
 var bullets = null;
 var map = new _map.Map();
+var highscores = null;
 var pseudo = void 0;
 
 socket.on('playerInit', function (args) {
@@ -141,6 +151,7 @@ socket.on('playerInit', function (args) {
 
 socket.on('updateWorld', function (nWorld) {
     convertNewWorld(nWorld);
+    highscores = JSON.parse(nWorld.highscores);
     if (!death()) {
         renderWorld();
     }
@@ -149,42 +160,6 @@ socket.on('updateWorld', function (nWorld) {
 socket.on('death', function () {
     death();
 });
-
-function updateListPlayer() {
-    _underscore2.default.sortBy(players, 'score');
-
-    var listPlayer = "";
-    var _iteratorNormalCompletion2 = true;
-    var _didIteratorError2 = false;
-    var _iteratorError2 = undefined;
-
-    try {
-        for (var _iterator2 = players[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-            var player = _step2.value;
-
-            if (player.id != myPlayerId) {
-                listPlayer += "<li>" + player.pseudo + " : " + player.score + " points</li>";
-            } else {
-                listPlayer += "<li>Moi : " + player.score + " points</li>";
-            }
-        }
-    } catch (err) {
-        _didIteratorError2 = true;
-        _iteratorError2 = err;
-    } finally {
-        try {
-            if (!_iteratorNormalCompletion2 && _iterator2.return) {
-                _iterator2.return();
-            }
-        } finally {
-            if (_didIteratorError2) {
-                throw _iteratorError2;
-            }
-        }
-    }
-
-    $("#ingamelist").html(listPlayer);
-}
 
 function death() {
     var player = _underscore2.default.findWhere(players, { id: myPlayerId });
@@ -195,7 +170,6 @@ function death() {
         $(document).off("keyup");
         $(document).off("mousedown");
         dead = true;
-        socket.close();
         map.drawDeadScreen(ctxfg, canvasfg);
         return true;
     }
@@ -211,6 +185,55 @@ function isHUDDirty() {
     if (players) {
         if (players.length != oldplayers.length) return true;
 
+        var _iteratorNormalCompletion2 = true;
+        var _didIteratorError2 = false;
+        var _iteratorError2 = undefined;
+
+        try {
+            for (var _iterator2 = players[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+                var player = _step2.value;
+
+                var oldplayer = _underscore2.default.findWhere(oldplayers, { id: player.id });
+                if (!oldplayer) return true;
+                if (player.score != oldplayer.score) return true;
+                if (player.pseudo != oldplayer.pseudo) return true;
+                if (player.lifepoints != oldplayers.lifepoints) return true;
+            }
+        } catch (err) {
+            _didIteratorError2 = true;
+            _iteratorError2 = err;
+        } finally {
+            try {
+                if (!_iteratorNormalCompletion2 && _iterator2.return) {
+                    _iterator2.return();
+                }
+            } finally {
+                if (_didIteratorError2) {
+                    throw _iteratorError2;
+                }
+            }
+        }
+    }
+
+    return dirty;
+}
+
+function updateHUD() {
+    var dirty = false;
+
+    dirty = isHUDDirty();
+
+    if (dirty) {
+        var y = 5;
+        players = _underscore2.default.sortBy(players, 'score');
+        ctxhud.clearRect(0, 0, canvasHUD.width, canvasHUD.height);
+
+        //x,y
+        renderer.drawImg(ctxhud, 0, 5, 20, 20, lifeimg);
+        renderer.drawText(ctxhud, 24, 20, _underscore2.default.findWhere(players, { id: myPlayerId }).lifepoints);
+
+        y = y + 40;
+        renderer.drawText(ctxhud, 0, y, "Liste des joueurs: ");
         var _iteratorNormalCompletion3 = true;
         var _didIteratorError3 = false;
         var _iteratorError3 = undefined;
@@ -219,10 +242,9 @@ function isHUDDirty() {
             for (var _iterator3 = players[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
                 var player = _step3.value;
 
-                var oldplayer = _underscore2.default.findWhere(oldplayers, { id: player.id });
-                if (!oldplayer) return true;
-                if (player.score != oldplayer.score) return true;
-                if (player.pseudo != oldplayer.pseudo) return true;
+                var text = player.pseudo + " : " + player.score + " points";
+                y += 25;
+                renderer.drawText(ctxhud, 0, y, text);
             }
         } catch (err) {
             _didIteratorError3 = true;
@@ -238,63 +260,54 @@ function isHUDDirty() {
                 }
             }
         }
-    }
 
-    return dirty;
-}
+        y += 45;
+        renderer.drawText(ctxhud, 0, y, "Highscores:");
+        if (!highscores) return;
+        var _iteratorNormalCompletion4 = true;
+        var _didIteratorError4 = false;
+        var _iteratorError4 = undefined;
 
-function updateHUD() {
-    var dirty = false;
+        try {
+            for (var _iterator4 = highscores[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+                var highscore = _step4.value;
 
-    dirty = isHUDDirty();
-
-    if (dirty) {
-        ctxhud.clearRect(0, 0, canvasHUD.width, canvasHUD.height);
-
-        for (var index in players) {
-            var player = players[index];
-            var text = player.pseudo + " : " + player.score + " points";
-            renderer.drawText(ctxhud, 0, index * 12 + 12, text);
+                var text = highscore.pseudo + " : " + highscore.score + " points";
+                y += 25;
+                renderer.drawText(ctxhud, 0, y, text);
+            }
+        } catch (err) {
+            _didIteratorError4 = true;
+            _iteratorError4 = err;
+        } finally {
+            try {
+                if (!_iteratorNormalCompletion4 && _iterator4.return) {
+                    _iterator4.return();
+                }
+            } finally {
+                if (_didIteratorError4) {
+                    throw _iteratorError4;
+                }
+            }
         }
     }
 }
 
 function renderWorld() {
     ctxfg.clearRect(0, 0, canvasfg.width, canvasfg.height);
-    var _iteratorNormalCompletion4 = true;
-    var _didIteratorError4 = false;
-    var _iteratorError4 = undefined;
-
-    try {
-        for (var _iterator4 = players[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-            var player = _step4.value;
-
-            map.drawPlayer(ctxfg, player);
-        }
-    } catch (err) {
-        _didIteratorError4 = true;
-        _iteratorError4 = err;
-    } finally {
-        try {
-            if (!_iteratorNormalCompletion4 && _iterator4.return) {
-                _iterator4.return();
-            }
-        } finally {
-            if (_didIteratorError4) {
-                throw _iteratorError4;
-            }
-        }
-    }
-
     var _iteratorNormalCompletion5 = true;
     var _didIteratorError5 = false;
     var _iteratorError5 = undefined;
 
     try {
-        for (var _iterator5 = bullets[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-            var bullet = _step5.value;
+        for (var _iterator5 = players[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+            var player = _step5.value;
 
-            map.drawBullet(ctxfg, bullet);
+            if (player.id != myPlayerId) {
+                map.drawPlayer(ctxfg, player, player.pseudo, avatar);
+            } else {
+                map.drawPlayer(ctxfg, player, "Moi", avatar);
+            }
         }
     } catch (err) {
         _didIteratorError5 = true;
@@ -307,6 +320,31 @@ function renderWorld() {
         } finally {
             if (_didIteratorError5) {
                 throw _iteratorError5;
+            }
+        }
+    }
+
+    var _iteratorNormalCompletion6 = true;
+    var _didIteratorError6 = false;
+    var _iteratorError6 = undefined;
+
+    try {
+        for (var _iterator6 = bullets[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+            var bullet = _step6.value;
+
+            map.drawBullet(ctxfg, bullet, bulletimg1);
+        }
+    } catch (err) {
+        _didIteratorError6 = true;
+        _iteratorError6 = err;
+    } finally {
+        try {
+            if (!_iteratorNormalCompletion6 && _iterator6.return) {
+                _iterator6.return();
+            }
+        } finally {
+            if (_didIteratorError6) {
+                throw _iteratorError6;
             }
         }
     }
@@ -389,7 +427,7 @@ if(pseudo!=null){
 console.log("pseudo: "+ pseudo)
 */
 
-},{"./bullet.js":1,"./game.js":5,"./map.js":6,"./renderer.js":62,"jquery":36,"socket.io-client":42,"underscore":58}],3:[function(require,module,exports){
+},{"./bullet.js":1,"./engine.js":4,"./game.js":5,"./map.js":6,"./renderer.js":62,"jquery":36,"socket.io-client":42,"underscore":58}],3:[function(require,module,exports){
 module.exports={
     "map1" : [
     ["W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W"],
@@ -418,6 +456,7 @@ function collide(obj1, player) {
 }
 
 function processInput(player, key) {
+	if (!player) return;
 	switch (key) {
 		case 'UP_PRESSED':
 			player.dirY = -1;
@@ -487,7 +526,6 @@ var Game = function () {
         _classCallCheck(this, Game);
 
         this.players = [];
-        this.sockets = [];
         this.bullets = [];
         this.highscores = [];
         this.map = new _map.Map();
@@ -500,11 +538,6 @@ var Game = function () {
             return _underscore2.default.findWhere(this.players, { id: playerId });
         }
     }, {
-        key: 'getSocket',
-        value: function getSocket(playerId) {
-            return _underscore2.default.findWhere(this.sockets, { id: this.getPlayer(playerId).socketId });
-        }
-    }, {
         key: 'addPlayer',
         value: function addPlayer(playerId) {
             if (this.getPlayer(playerId)) {
@@ -513,12 +546,6 @@ var Game = function () {
             var player = new _player.Player(playerId);
             this.players.push(player);
             return player;
-        }
-    }, {
-        key: 'addSocket',
-        value: function addSocket(socket, playerId) {
-            this.sockets.push(socket);
-            this.getPlayer(playerId).setSocketId(socket.id);
         }
     }, {
         key: 'addBullet',
@@ -534,7 +561,6 @@ var Game = function () {
     }, {
         key: 'removePlayer',
         value: function removePlayer(player) {
-            this.sockets = _underscore2.default.without(this.sockets, this.getSocket(player.id));
             this.players = _underscore2.default.without(this.players, player);
         }
     }, {
@@ -610,6 +636,9 @@ var Game = function () {
     }, {
         key: 'checkForHighScores',
         value: function checkForHighScores(player) {
+            if (this.highscores.length <= 0) {
+                this.highscores.push({ pseudo: player.pseudo, player: player.id, score: player.score });
+            }
             var _iteratorNormalCompletion3 = true;
             var _didIteratorError3 = false;
             var _iteratorError3 = undefined;
@@ -620,10 +649,11 @@ var Game = function () {
 
                     if (player.score > score.score) {
                         var tmp = this.highscores.indexOf(score);
-                        this.highscores.splice(tmp, 0, { player: player.id, score: player.score });
+                        this.highscores.splice(tmp, 0, { pseudo: player.pseudo, player: player.id, score: player.score });
                         if (this.highscores.length > 20) {
                             this.highscores.pop();
                         }
+                        return;
                     }
                 }
             } catch (err) {
@@ -644,10 +674,9 @@ var Game = function () {
     }, {
         key: 'onDeath',
         value: function onDeath(player) {
+            if (!player) return;
             this.checkForHighScores(player);
             player.state = "dead";
-            this.getSocket(player.id).emit("death", {});
-            //  this.removePlayer(player);
         }
     }, {
         key: 'updatePlayer',
@@ -905,32 +934,29 @@ var Map = function () {
         }
     }, {
         key: 'drawBullet',
-        value: function drawBullet(canv, bullet) {
-            canv.beginPath();
-            canv.rect(bullet.x, bullet.y, bullet.width, bullet.height);
-            canv.fillStyle = "white";
-            canv.fill();
-            canv.closePath();
+        value: function drawBullet(canv, bullet, img) {
+            renderer.drawImg(canv, bullet.x, bullet.y, bullet.width, bullet.height, img);
         }
     }, {
         key: 'drawPlayer',
-        value: function drawPlayer(canv, player) {
-            //var player = environment.players[playerId];
-
+        value: function drawPlayer(canv, player, pseudo, img) {
             /* pre rendering */
             if (player.state == "dead") return;
-            canv.beginPath();
-            canv.rect(player.x, player.y, player.width, player.height);
-            canv.fillStyle = "green";
-            canv.fill();
-            canv.closePath();
-            //this.drawElement(canv, player.x,player.y,player.width, player.height, "life.png");
+
+            renderer.drawText(canv, player.x, player.y - 10, pseudo, "white");
+            renderer.drawImg(canv, player.x, player.y, player.width, player.height, img);
         }
     }, {
         key: 'drawDeadScreen',
         value: function drawDeadScreen(canv, canvfg) {
-            canv.clearRect(0, 0, canvfg.width, canvfg.height);
+            //canv.clearRect(0,0,canvfg.width, canvfg.height
+            canv.beginPath();
+            canv.rect(0, 0, canvfg.width, canvfg.height);
+            canv.fillStyle = "black";
+            canv.fill();
+            canv.closePath();
             canv.fillStyle = "red";
+            canv.font = "50px OptimusPrinceps";
             canv.textAlign = "center";
             canv.fillText("YOU DIED", canvfg.width / 2, canvfg.height / 2);
         }
@@ -20731,7 +20757,6 @@ var Player = function () {
         _classCallCheck(this, Player);
 
         this.id = playerId;
-        this.socketId = "";
         this.pseudo = "Bob" + playerId;
         this.state = "alive";
         this.score = 0;
@@ -20741,8 +20766,8 @@ var Player = function () {
         this.y = 0;
         this.dirX = 0;
         this.dirY = 0;
-        this.width = 20;
-        this.height = 20;
+        this.width = 24;
+        this.height = 30;
         //this.bonus = new Bonus();
         //this.malus = new Malus();
     }
@@ -20751,11 +20776,6 @@ var Player = function () {
         key: "setPseudo",
         value: function setPseudo(pseudo) {
             this.pseudo = pseudo;
-        }
-    }, {
-        key: "setSocketId",
-        value: function setSocketId(socketId) {
-            this.socketId = socketId;
         }
     }, {
         key: "getTouched",
@@ -20802,14 +20822,21 @@ function drawElement(canv, x, y, width, height, color) {
   img.src = color;
 }
 
+function drawImg(canv, x, y, width, height, img) {
+  canv.drawImage(img, x, y);
+}
+
 function drawText(ctx, x, y, text, color) {
   color = color ? color : "black";
+  //font = font ? font: "12px Arial";
   ctx.fillStyle = color;
   //ctx.textAlign = "center";
+  //ctx.font = font;
   ctx.fillText(text, x, y);
 }
 
 exports.drawElement = drawElement;
+exports.drawImg = drawImg;
 exports.drawText = drawText;
 
 },{}]},{},[2]);

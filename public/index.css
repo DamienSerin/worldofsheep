@@ -16,3 +16,7 @@
   left: 1010px;
 }
 
+@font-face {
+    font-family: 'OptimusPrinceps';
+    src: url('./OptimusPrinceps.ttf');
+}
