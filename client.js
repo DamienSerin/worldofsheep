@@ -84,6 +84,7 @@ function death(){
     $(document).off("mousedown");
     dead = true;
     map.drawDeadScreen(ctxfg, canvasfg);
+    updateHUD();
     return true;
   }
   return false;

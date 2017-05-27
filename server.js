@@ -43,6 +43,7 @@ io.sockets.on('connection', socket => {
 
     socket.on('disconnect', function(){
         socket.disconnect();
+        game.checkForHighScores(game.getPlayer(playerId));
         game.removePlayer(game.getPlayer(playerId));
     })
 
