@@ -6,7 +6,7 @@ class Bonus{
         this.y = 50;
      	this.width = 15;
 	    this.height = 15;
-        this.duration = 10; /*in secondes*/
+        this.duration = 7; /*in secondes*/
         this.type = type;
         this.name = name;
         this.timeBeginMap = timeBeginMap;

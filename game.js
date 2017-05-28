@@ -48,11 +48,12 @@ class Game {
          let bullet = new Bullet(arg.idOwner, arg.x, arg.y, arg.dirX, arg.dirY);
         
         if (this.howManyBonus(arg.idOwner) > 0){
-            let b = this.getBonus(arg.idOwner, "bulletBonus")[0];
-    //        console.log(b);
-            if(!engine.isTimeout(b.timeBeginPlayer, b.duration) && b.type == "bulletBonus"){
-                    bullet.setBonusAction(b.effectDammage, b.effectSpeedBullet, b.effectScore);
-           }
+            let b = this.getBonus(arg.idOwner, "bulletBonus");
+            if (b.length > 0){
+                if(!engine.isTimeout(b[0].timeBeginPlayer, b[0].duration) && b[0].type == "bulletBonus"){
+                        bullet.setBonusAction(b[0].effectDammage, b[0].effectSpeedBullet, b[0].effectScore);
+                }
+            }
         }
         this.bullets.push(bullet);
     }
@@ -127,6 +128,7 @@ class Game {
         /*check les  collisions avec bonus*/
         for(let b of this.bonus){
             if(engine.collide(player, b)){
+                /*efface les bonus de même type que ceux déjà possédés*/
                 if(this.howManyBonus(player.id) > 1 && (this.getBonus(player.id, b.type > 0))){
                     this.removeBonus(_.findWhere(this.bonus, {id:player.id, type:b.type}));
                 }
@@ -140,10 +142,16 @@ class Game {
     updatePlayer(player){
         let oldx = player.x;
         let oldy = player.y;
+        let speed = player.speed;
+        let bonus = this.getBonus(player.id,"playerBonus");
+        
+        if (bonus.length > 0){
+            speed += bonus[0].effectSpeedOwner;     
+        }
 
         /* update de la position du joueur */
-        player.x += player.dirX * player.speed;
-        player.y += player.dirY * player.speed;
+        player.x += player.dirX * speed;
+        player.y += player.dirY * speed;
 
         /* check les collisions avec les murs */
         for(let wall of this.map.walls){
@@ -171,12 +179,22 @@ class Game {
         for(let wall of this.map.walls){
             if(engine.collide(wall, bullet)){
                 this.removeBullet(bullet);
-                return;
             }
         }
         for(let player of this.players){
             if(bullet.didTouch(player)){
-                player.getTouched(bullet);
+                let bonus = this.getBonus(player.id, "shield");
+                if (bonus.length > 0){
+                    let diff = Math.abs(bonus.effectLife - bullet.dammage);
+                    bonus.effectLife -= bullet.dammage;
+                    if (bonus.effectLife <= 0){
+                        bullet.dammage = diff;
+                        player.getTouched(bullet);
+                    }
+                }
+                else{
+                    player.getTouched(bullet);
+                }
                 (this.getPlayer(bullet.idOwner)).ennemyTouched(bullet);
                 this.removeBullet(bullet);
                 if(player.isDead()){
@@ -215,7 +233,6 @@ class Game {
             }
         }
         
-        //console.log("add new bonus");
         let newBonus = new Bonus(this.idBonus++, Math.floor(Date.now() / 1000), bonus.type, bonus.name, bonus.effectLife, bonus.effectDammage, bonus.effectSpeedOwner, bonus.effectSpeedBullet, bonus.effectScore);
         newBonus.setCoordonnes(tmpObj.x, tmpObj.y);
         this.bonus.push(newBonus);

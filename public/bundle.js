@@ -19,7 +19,7 @@ var Bonus = function () {
         this.y = 50;
         this.width = 15;
         this.height = 15;
-        this.duration = 10; /*in secondes*/
+        this.duration = 7; /*in secondes*/
         this.type = type;
         this.name = name;
         this.timeBeginMap = timeBeginMap;
@@ -891,10 +891,11 @@ var Game = function () {
             var bullet = new _bullet.Bullet(arg.idOwner, arg.x, arg.y, arg.dirX, arg.dirY);
 
             if (this.howManyBonus(arg.idOwner) > 0) {
-                var b = this.getBonus(arg.idOwner, "bulletBonus")[0];
-                //        console.log(b);
-                if (!engine.isTimeout(b.timeBeginPlayer, b.duration) && b.type == "bulletBonus") {
-                    bullet.setBonusAction(b.effectDammage, b.effectSpeedBullet, b.effectScore);
+                var b = this.getBonus(arg.idOwner, "bulletBonus");
+                if (b.length > 0) {
+                    if (!engine.isTimeout(b[0].timeBeginPlayer, b[0].duration) && b[0].type == "bulletBonus") {
+                        bullet.setBonusAction(b[0].effectDammage, b[0].effectSpeedBullet, b[0].effectScore);
+                    }
                 }
             }
             this.bullets.push(bullet);
@@ -1047,6 +1048,7 @@ var Game = function () {
                     var b = _step5.value;
 
                     if (engine.collide(player, b)) {
+                        /*efface les bonus de même type que ceux déjà possédés*/
                         if (this.howManyBonus(player.id) > 1 && this.getBonus(player.id, b.type > 0)) {
                             this.removeBonus(_underscore2.default.findWhere(this.bonus, { id: player.id, type: b.type }));
                         }
@@ -1075,10 +1077,16 @@ var Game = function () {
         value: function updatePlayer(player) {
             var oldx = player.x;
             var oldy = player.y;
+            var speed = player.speed;
+            var bonus = this.getBonus(player.id, "playerBonus");
+
+            if (bonus.length > 0) {
+                speed += bonus[0].effectSpeedOwner;
+            }
 
             /* update de la position du joueur */
-            player.x += player.dirX * player.speed;
-            player.y += player.dirY * player.speed;
+            player.x += player.dirX * speed;
+            player.y += player.dirY * speed;
 
             /* check les collisions avec les murs */
             var _iteratorNormalCompletion6 = true;
@@ -1157,7 +1165,6 @@ var Game = function () {
 
                     if (engine.collide(wall, bullet)) {
                         this.removeBullet(bullet);
-                        return;
                     }
                 }
             } catch (err) {
@@ -1184,7 +1191,17 @@ var Game = function () {
                     var player = _step9.value;
 
                     if (bullet.didTouch(player)) {
-                        player.getTouched(bullet);
+                        var bonus = this.getBonus(player.id, "shield");
+                        if (bonus.length > 0) {
+                            var diff = Math.abs(bonus.effectLife - bullet.dammage);
+                            bonus.effectLife -= bullet.dammage;
+                            if (bonus.effectLife <= 0) {
+                                bullet.dammage = diff;
+                                player.getTouched(bullet);
+                            }
+                        } else {
+                            player.getTouched(bullet);
+                        }
                         this.getPlayer(bullet.idOwner).ennemyTouched(bullet);
                         this.removeBullet(bullet);
                         if (player.isDead()) {
@@ -1303,7 +1320,6 @@ var Game = function () {
                 }
             }
 
-            //console.log("add new bonus");
             var newBonus = new _bonus.Bonus(this.idBonus++, Math.floor(Date.now() / 1000), bonus.type, bonus.name, bonus.effectLife, bonus.effectDammage, bonus.effectSpeedOwner, bonus.effectSpeedBullet, bonus.effectScore);
             newBonus.setCoordonnes(tmpObj.x, tmpObj.y);
             this.bonus.push(newBonus);
