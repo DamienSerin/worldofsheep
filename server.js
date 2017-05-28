@@ -24,7 +24,7 @@ io.sockets.on('connection', socket => {
     let playerId = nextPlayerId;
     nextPlayerId++;
     game.placePlayer(playerId);
-    socket.emit('playerInit', {id: playerId, players: JSON.stringify(game.players), map: JSON.stringify(game.map), bullets: JSON.stringify(game.bullets)});
+    socket.emit('playerInit', {id: playerId, players: JSON.stringify(game.players), map: JSON.stringify(game.map), bullets: JSON.stringify(game.bullets), bonus: JSON.stringify(game.bonus)});
 
 
     socket.on('input', function(userInput){
@@ -49,10 +49,16 @@ io.sockets.on('connection', socket => {
 
 });
 
+function bonusLoop(){
+    game.generateBonus();
+}
+setInterval(bonusLoop, 10000); //10secondes
+
 function gameLoop(){
     game.updateWorld();
-    io.emit('updateWorld', {players: JSON.stringify(game.players), bullets: JSON.stringify(game.bullets), highscores: JSON.stringify(game.highscores)});
+    io.emit('updateWorld', {players: JSON.stringify(game.players), bullets: JSON.stringify(game.bullets), highscores: JSON.stringify(game.highscores), bonus: JSON.stringify(game.bonus)});
     game.removeDead();
+    game.refreshBonusList();
 }
 setInterval(gameLoop, 0.09);
 

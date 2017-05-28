@@ -12,10 +12,29 @@ class Bullet {
 	    this.height = 15;
 	    this.dirX = dirX;
 	    this.dirY = dirY;
+	    this.img = "bullet";
 	}
 
 	didTouch(player){
 		return engine.collide(player, this) && player.id != this.idOwner;
+	}
+	
+	setScoreIncrease(score){
+		this.scoreIncrease = score;
+	}
+	
+	setBonusAction(dammage, speed, score){
+		this.dammage += dammage;
+		this.speed += speed;
+		this.scoreIncrease += score;
+	}
+	
+	setDammage(dammage){
+		this.dammage = dammage;
+	}
+	
+	setSpeed(speed){
+		this.speed = speed;
 	}
 }
 

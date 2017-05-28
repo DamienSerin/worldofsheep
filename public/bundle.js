@@ -1,5 +1,106 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-'use strict';
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Bonus = function () {
+    function Bonus(id, timeBeginMap, type, name, effectLife, effectDammage, effectSpeedOwner, effectSpeedBullet, effectScore) {
+        _classCallCheck(this, Bonus);
+
+        this.id = id;
+        this.idOwner = 0;
+        this.x = 50;
+        this.y = 50;
+        this.width = 15;
+        this.height = 15;
+        this.duration = 10; /*in secondes*/
+        this.type = type;
+        this.name = name;
+        this.timeBeginMap = timeBeginMap;
+        this.timeBeginPlayer = null;
+        this.effectLife = effectLife;
+        this.effectDammage = effectDammage;
+        this.effectSpeedOwner = effectSpeedOwner;
+        this.effectSpeedBullet = effectSpeedBullet;
+        this.effectScore = effectScore;
+    }
+
+    _createClass(Bonus, [{
+        key: "setOwner",
+        value: function setOwner(id) {
+            this.idOwner = id;
+        }
+    }, {
+        key: "setTimeBeginPlayer",
+        value: function setTimeBeginPlayer() {
+            this.timeBeginPlayer = Math.floor(Date.now() / 1000);
+        }
+    }, {
+        key: "setBeginMap",
+        value: function setBeginMap(time) {
+            this.timeBeginMap = time;
+        }
+    }, {
+        key: "setCoordonnes",
+        value: function setCoordonnes(x, y) {
+            this.x = x;
+            this.y = y;
+        }
+    }, {
+        key: "setBeginPlayer",
+        value: function setBeginPlayer(time) {
+            this.timeBeginPlayer = time;
+        }
+    }, {
+        key: "setImg",
+        value: function setImg(img) {
+            this.img = img;
+        }
+    }, {
+        key: "setEffectLife",
+        value: function setEffectLife(life) {
+            this.effectLife = life;
+        }
+    }, {
+        key: "setEffectDammage",
+        value: function setEffectDammage(dammage) {
+            this.effectDammage = dammage;
+        }
+    }, {
+        key: "setEffectSpeedOwner",
+        value: function setEffectSpeedOwner(speed) {
+            this.effectSpeedOwner = speed;
+        }
+    }, {
+        key: "setEffectSpeedBuller",
+        value: function setEffectSpeedBuller(speed) {
+            this.effectSpeedBullet = speed;
+        }
+    }, {
+        key: "setDuration",
+        value: function setDuration(duration) {
+            this.duration = duration;
+        }
+    }, {
+        key: "setEffectScore",
+        value: function setEffectScore(score) {
+            this.effectScore = score;
+        }
+    }]);
+
+    return Bonus;
+}();
+
+exports.Bonus = Bonus;
+
+},{}],2:[function(require,module,exports){
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
 	value: true
@@ -8,7 +109,7 @@ exports.Bullet = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _engine = require('./engine.js');
+var _engine = require("./engine.js");
 
 var engine = _interopRequireWildcard(_engine);
 
@@ -30,12 +131,35 @@ var Bullet = function () {
 		this.height = 15;
 		this.dirX = dirX;
 		this.dirY = dirY;
+		this.img = "bullet";
 	}
 
 	_createClass(Bullet, [{
-		key: 'didTouch',
+		key: "didTouch",
 		value: function didTouch(player) {
 			return engine.collide(player, this) && player.id != this.idOwner;
+		}
+	}, {
+		key: "setScoreIncrease",
+		value: function setScoreIncrease(score) {
+			this.scoreIncrease = score;
+		}
+	}, {
+		key: "setBonusAction",
+		value: function setBonusAction(dammage, speed, score) {
+			this.dammage += dammage;
+			this.speed += speed;
+			this.scoreIncrease += score;
+		}
+	}, {
+		key: "setDammage",
+		value: function setDammage(dammage) {
+			this.dammage = dammage;
+		}
+	}, {
+		key: "setSpeed",
+		value: function setSpeed(speed) {
+			this.speed = speed;
 		}
 	}]);
 
@@ -44,7 +168,7 @@ var Bullet = function () {
 
 exports.Bullet = Bullet;
 
-},{"./engine.js":4}],2:[function(require,module,exports){
+},{"./engine.js":5}],3:[function(require,module,exports){
 'use strict';
 
 var _underscore = require('underscore');
@@ -72,6 +196,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var $ = require("jquery");
 var socket = require('socket.io-client')();
 
+var config = require('./config.json');
 
 /* pour tester: https://worldofsheep-sandra-laduranti.c9users.io:8080*/
 
@@ -95,15 +220,20 @@ tmp_canvas.height = 600;
 
 var lifeimg = document.getElementById('lifepoints');
 //let avatar = document.getElementById('avatar1down');
-var bulletimg1 = document.getElementById('bullet1');
+var bulletimg1 = document.getElementById('bullet');
+var bonusimg1 = document.getElementById('bonus1');
 
 var avatars = [];
+var bonusimg = [];
 
 var dead = false;
 var myPlayerId = -1;
 var oldplayers = null;
 var players = null;
 var bullets = null;
+var oldbonus = null;
+var bonus = null;
+var mybonus = null;
 var map = new _map.Map();
 var highscores = null;
 var pseudo = void 0;
@@ -137,6 +267,31 @@ function initImg() {
             }
         }
     }
+
+    var _iteratorNormalCompletion2 = true;
+    var _didIteratorError2 = false;
+    var _iteratorError2 = undefined;
+
+    try {
+        for (var _iterator2 = config.bonus[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+            var bon = _step2.value;
+
+            bonusimg.push(document.getElementById(bon.name));
+        }
+    } catch (err) {
+        _didIteratorError2 = true;
+        _iteratorError2 = err;
+    } finally {
+        try {
+            if (!_iteratorNormalCompletion2 && _iterator2.return) {
+                _iterator2.return();
+            }
+        } finally {
+            if (_didIteratorError2) {
+                throw _iteratorError2;
+            }
+        }
+    }
 }
 
 socket.on('playerInit', function (args) {
@@ -154,27 +309,27 @@ socket.on('playerInit', function (args) {
         socket.emit('setPseudo', { pseudo: pseudo });
     }
 
-    var _iteratorNormalCompletion2 = true;
-    var _didIteratorError2 = false;
-    var _iteratorError2 = undefined;
+    var _iteratorNormalCompletion3 = true;
+    var _didIteratorError3 = false;
+    var _iteratorError3 = undefined;
 
     try {
-        for (var _iterator2 = map.walls[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-            var wall = _step2.value;
+        for (var _iterator3 = map.walls[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+            var wall = _step3.value;
 
             map.drawWall(ctxbg, wall);
         }
     } catch (err) {
-        _didIteratorError2 = true;
-        _iteratorError2 = err;
+        _didIteratorError3 = true;
+        _iteratorError3 = err;
     } finally {
         try {
-            if (!_iteratorNormalCompletion2 && _iterator2.return) {
-                _iterator2.return();
+            if (!_iteratorNormalCompletion3 && _iterator3.return) {
+                _iterator3.return();
             }
         } finally {
-            if (_didIteratorError2) {
-                throw _iteratorError2;
+            if (_didIteratorError3) {
+                throw _iteratorError3;
             }
         }
     }
@@ -219,55 +374,6 @@ function isHUDDirty() {
     if (players) {
         if (players.length != oldplayers.length) return true;
 
-        var _iteratorNormalCompletion3 = true;
-        var _didIteratorError3 = false;
-        var _iteratorError3 = undefined;
-
-        try {
-            for (var _iterator3 = players[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-                var player = _step3.value;
-
-                var oldplayer = _underscore2.default.findWhere(oldplayers, { id: player.id });
-                if (!oldplayer) return true;
-                if (player.score != oldplayer.score) return true;
-                if (player.pseudo != oldplayer.pseudo) return true;
-                if (player.lifepoints != oldplayers.lifepoints) return true;
-            }
-        } catch (err) {
-            _didIteratorError3 = true;
-            _iteratorError3 = err;
-        } finally {
-            try {
-                if (!_iteratorNormalCompletion3 && _iterator3.return) {
-                    _iterator3.return();
-                }
-            } finally {
-                if (_didIteratorError3) {
-                    throw _iteratorError3;
-                }
-            }
-        }
-    }
-
-    return dirty;
-}
-
-function updateHUD() {
-    var dirty = false;
-
-    dirty = isHUDDirty();
-
-    if (dirty) {
-        var y = 5;
-        players = _underscore2.default.sortBy(players, 'score');
-        ctxhud.clearRect(0, 0, canvasHUD.width, canvasHUD.height);
-
-        //x,y
-        renderer.drawImg(ctxhud, 0, 5, 20, 20, lifeimg);
-        renderer.drawText(ctxhud, 24, 20, _underscore2.default.findWhere(players, { id: myPlayerId }).lifepoints);
-
-        y = y + 40;
-        renderer.drawText(ctxhud, 0, y, "Liste des joueurs: ");
         var _iteratorNormalCompletion4 = true;
         var _didIteratorError4 = false;
         var _iteratorError4 = undefined;
@@ -276,9 +382,11 @@ function updateHUD() {
             for (var _iterator4 = players[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
                 var player = _step4.value;
 
-                var text = player.pseudo + " : " + player.score + " points";
-                y += 25;
-                renderer.drawText(ctxhud, 0, y, text);
+                var oldplayer = _underscore2.default.findWhere(oldplayers, { id: player.id });
+                if (!oldplayer) return true;
+                if (player.score != oldplayer.score) return true;
+                if (player.pseudo != oldplayer.pseudo) return true;
+                if (player.lifepoints != oldplayers.lifepoints) return true;
             }
         } catch (err) {
             _didIteratorError4 = true;
@@ -294,21 +402,23 @@ function updateHUD() {
                 }
             }
         }
+    }
 
-        y += 45;
-        renderer.drawText(ctxhud, 0, y, "Highscores:");
-        if (!highscores) return;
+    if (!oldbonus) return true;
+
+    if (mybonus) {
+        if (mybonus.length != oldbonus.length) return true;
+
         var _iteratorNormalCompletion5 = true;
         var _didIteratorError5 = false;
         var _iteratorError5 = undefined;
 
         try {
-            for (var _iterator5 = highscores[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-                var highscore = _step5.value;
+            for (var _iterator5 = mybonus[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+                var b = _step5.value;
 
-                var text = highscore.pseudo + " : " + highscore.score + " points";
-                y += 25;
-                renderer.drawText(ctxhud, 0, y, text);
+                var oldb = _underscore2.default.findWhere(oldbonus, { id: oldb.id });
+                if (!oldb) return true;
             }
         } catch (err) {
             _didIteratorError5 = true;
@@ -325,6 +435,112 @@ function updateHUD() {
             }
         }
     }
+
+    return dirty;
+}
+
+function updateHUD() {
+    var dirty = false;
+
+    dirty = isHUDDirty();
+
+    if (dirty) {
+        var y = 5;
+        var x = 0;
+        players = _underscore2.default.sortBy(players, 'score');
+        ctxhud.clearRect(0, 0, canvasHUD.width, canvasHUD.height);
+
+        //x,y
+        renderer.drawImg(ctxhud, 0, 5, 20, 20, lifeimg);
+        renderer.drawText(ctxhud, 24, 20, _underscore2.default.findWhere(players, { id: myPlayerId }).lifepoints);
+
+        x = 60;
+        var _iteratorNormalCompletion6 = true;
+        var _didIteratorError6 = false;
+        var _iteratorError6 = undefined;
+
+        try {
+            for (var _iterator6 = mybonus[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+                var b = _step6.value;
+
+                renderer.drawImg(ctxhud, x, 5, 15, 15, _underscore2.default.findWhere(bonusimg, { id: b.name }));
+                x += 20;
+            }
+        } catch (err) {
+            _didIteratorError6 = true;
+            _iteratorError6 = err;
+        } finally {
+            try {
+                if (!_iteratorNormalCompletion6 && _iterator6.return) {
+                    _iterator6.return();
+                }
+            } finally {
+                if (_didIteratorError6) {
+                    throw _iteratorError6;
+                }
+            }
+        }
+
+        y += 40;
+        renderer.drawText(ctxhud, 0, y, "Liste des joueurs: ");
+        var _iteratorNormalCompletion7 = true;
+        var _didIteratorError7 = false;
+        var _iteratorError7 = undefined;
+
+        try {
+            for (var _iterator7 = players[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
+                var player = _step7.value;
+
+                var point = player.score > 1 ? "points" : "point";
+                var text = player.pseudo + " : " + player.score + point;
+                y += 25;
+                renderer.drawText(ctxhud, 0, y, text);
+            }
+        } catch (err) {
+            _didIteratorError7 = true;
+            _iteratorError7 = err;
+        } finally {
+            try {
+                if (!_iteratorNormalCompletion7 && _iterator7.return) {
+                    _iterator7.return();
+                }
+            } finally {
+                if (_didIteratorError7) {
+                    throw _iteratorError7;
+                }
+            }
+        }
+
+        y += 45;
+        renderer.drawText(ctxhud, 0, y, "Highscores:");
+        if (!highscores) return;
+        var _iteratorNormalCompletion8 = true;
+        var _didIteratorError8 = false;
+        var _iteratorError8 = undefined;
+
+        try {
+            for (var _iterator8 = highscores[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
+                var highscore = _step8.value;
+
+                var text = highscore.pseudo + " : " + highscore.score + " points";
+                y += 25;
+                renderer.drawText(ctxhud, 0, y, text);
+            }
+        } catch (err) {
+            _didIteratorError8 = true;
+            _iteratorError8 = err;
+        } finally {
+            try {
+                if (!_iteratorNormalCompletion8 && _iterator8.return) {
+                    _iterator8.return();
+                }
+            } finally {
+                if (_didIteratorError8) {
+                    throw _iteratorError8;
+                }
+            }
+        }
+    }
 }
 
 function getAvatarDirection(player) {
@@ -333,57 +549,84 @@ function getAvatarDirection(player) {
 
 function renderWorld() {
     ctxfg.clearRect(0, 0, canvasfg.width, canvasfg.height);
-    var _iteratorNormalCompletion6 = true;
-    var _didIteratorError6 = false;
-    var _iteratorError6 = undefined;
+    var _iteratorNormalCompletion9 = true;
+    var _didIteratorError9 = false;
+    var _iteratorError9 = undefined;
 
     try {
-        for (var _iterator6 = players[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
-            var player = _step6.value;
+        for (var _iterator9 = players[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
+            var player = _step9.value;
 
             if (player.id != myPlayerId) {
-                // _.findWhere(players, {id: myPlayerId});
                 map.drawPlayer(ctxfg, player, player.pseudo, _underscore2.default.findWhere(avatars, { id: getAvatarDirection(player) }));
             } else {
                 map.drawPlayer(ctxfg, player, "Moi", _underscore2.default.findWhere(avatars, { id: getAvatarDirection(player) }));
             }
         }
     } catch (err) {
-        _didIteratorError6 = true;
-        _iteratorError6 = err;
+        _didIteratorError9 = true;
+        _iteratorError9 = err;
     } finally {
         try {
-            if (!_iteratorNormalCompletion6 && _iterator6.return) {
-                _iterator6.return();
+            if (!_iteratorNormalCompletion9 && _iterator9.return) {
+                _iterator9.return();
             }
         } finally {
-            if (_didIteratorError6) {
-                throw _iteratorError6;
+            if (_didIteratorError9) {
+                throw _iteratorError9;
             }
         }
     }
 
-    var _iteratorNormalCompletion7 = true;
-    var _didIteratorError7 = false;
-    var _iteratorError7 = undefined;
+    var _iteratorNormalCompletion10 = true;
+    var _didIteratorError10 = false;
+    var _iteratorError10 = undefined;
 
     try {
-        for (var _iterator7 = bullets[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
-            var bullet = _step7.value;
+        for (var _iterator10 = bullets[Symbol.iterator](), _step10; !(_iteratorNormalCompletion10 = (_step10 = _iterator10.next()).done); _iteratorNormalCompletion10 = true) {
+            var bullet = _step10.value;
 
             map.drawBullet(ctxfg, bullet, bulletimg1);
         }
     } catch (err) {
-        _didIteratorError7 = true;
-        _iteratorError7 = err;
+        _didIteratorError10 = true;
+        _iteratorError10 = err;
     } finally {
         try {
-            if (!_iteratorNormalCompletion7 && _iterator7.return) {
-                _iterator7.return();
+            if (!_iteratorNormalCompletion10 && _iterator10.return) {
+                _iterator10.return();
             }
         } finally {
-            if (_didIteratorError7) {
-                throw _iteratorError7;
+            if (_didIteratorError10) {
+                throw _iteratorError10;
+            }
+        }
+    }
+
+    var _iteratorNormalCompletion11 = true;
+    var _didIteratorError11 = false;
+    var _iteratorError11 = undefined;
+
+    try {
+        for (var _iterator11 = bonus[Symbol.iterator](), _step11; !(_iteratorNormalCompletion11 = (_step11 = _iterator11.next()).done); _iteratorNormalCompletion11 = true) {
+            var b = _step11.value;
+
+            // && engine.isTimeout(b.timeBeginMap, b.duration)
+            if (b.idOwner == 0) {
+                map.drawBonus(ctxfg, b, _underscore2.default.findWhere(bonusimg, { id: b.name }));
+            }
+        }
+    } catch (err) {
+        _didIteratorError11 = true;
+        _iteratorError11 = err;
+    } finally {
+        try {
+            if (!_iteratorNormalCompletion11 && _iterator11.return) {
+                _iterator11.return();
+            }
+        } finally {
+            if (_didIteratorError11) {
+                throw _iteratorError11;
             }
         }
     }
@@ -394,8 +637,12 @@ function renderWorld() {
 function convertNewWorld(nWorld) {
     oldplayers = players;
     players = JSON.parse(nWorld.players);
-    //let tmp = JSON.parse(nWorld.map);
     bullets = JSON.parse(nWorld.bullets);
+    if (nWorld.bonus.length > 0) {
+        bonus = JSON.parse(nWorld.bonus);
+        oldbonus = mybonus;
+        mybonus = _underscore2.default.filter(bonus, { idOwner: myPlayerId });
+    }
 }
 
 $(document).on('keydown', function (event) {
@@ -461,12 +708,7 @@ $(document).on('mousedown', function (event) {
     }
 });
 
-/*let pseudo = prompt("Veuillez saisir votre pseudo pour jouer","Bob");
-if(pseudo!=null){
-console.log("pseudo: "+ pseudo)
-*/
-
-},{"./bullet.js":1,"./engine.js":4,"./game.js":5,"./map.js":6,"./renderer.js":62,"jquery":36,"socket.io-client":42,"underscore":58}],3:[function(require,module,exports){
+},{"./bullet.js":2,"./config.json":4,"./engine.js":5,"./game.js":6,"./map.js":7,"./renderer.js":63,"jquery":37,"socket.io-client":43,"underscore":59}],4:[function(require,module,exports){
 module.exports={
     "map1" : [
     ["W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W"],
@@ -481,10 +723,16 @@ module.exports={
     ["W","","S","","W","","","","","W","W","","","","","","","","","W"],
     ["W","","","","","","","","","W","W","","","","","","","","","W"],
     ["W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W","W"]
-    ]
+    ],
+    "bonus": [{"bonusId":0, "type":"shield", "name": "Shield", "effectLife":100, "effectDammage":0,"effectSpeedOwner":0, "effectSpeedBullet":0, "effectScore":0},
+    {"bonusId":1, "type":"bulletBonus", "name": "MasterBullet", "effectLife":0, "effectDammage":2,"effectSpeedOwner":0, "effectSpeedBullet":0, "effectScore":2},
+    {"bonusId":2, "type":"bulletBonus","name" : "GodOfBullet", "effectLife":0, "effectDammage":4,"effectSpeedOwner":0, "effectSpeedBullet":-0.2, "effectScore":4},
+    {"bonusId":3, "type":"playerBonus","name" : "BonusSpeed", "effectLife":0, "effectDammage":0,"effectSpeedOwner":0.2, "effectSpeedBullet":0, "effectScore":0},
+    {"bonusId":4, "type":"bulletBonus","name" : "MalusDammage", "effectLife":0, "effectDammage":-1, "effectSpeedOwner":0, "effectSpeedBullet":0, "effectScore":0},
+    {"bonusId":5, "type":"playerBonus","name" : "MalusSpeed", "effectLife":0, "effectDammage":0, "effectSpeedOwner":-0.2, "effectSpeedBullet":0, "effectScore":0}]
 }
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -530,10 +778,15 @@ function processInput(player, key) {
 	}
 }
 
+function isTimeout(time, duration) {
+	return Math.floor(Date.now() / 1000) - time > duration;
+}
+
 exports.collide = collide;
+exports.isTimeout = isTimeout;
 exports.processInput = processInput;
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -552,6 +805,8 @@ var _player = require('./player.js');
 var _map = require('./map.js');
 
 var _bullet = require('./bullet.js');
+
+var _bonus = require('./bonus.js');
 
 var _engine = require('./engine.js');
 
@@ -574,6 +829,8 @@ var Game = function () {
         this.highscores = [];
         this.map = new _map.Map();
         this.map.generateMap(config.map1);
+        this.bonus = [];
+        this.idBonus = 0;
     }
 
     _createClass(Game, [{
@@ -582,45 +839,24 @@ var Game = function () {
             return _underscore2.default.findWhere(this.players, { id: playerId });
         }
     }, {
-        key: 'addPlayer',
-        value: function addPlayer(playerId) {
-            if (this.getPlayer(playerId)) {
-                return;
-            }
-            var player = new _player.Player(playerId);
-            this.players.push(player);
-            return player;
+        key: 'getBonus',
+        value: function getBonus(playerId, type) {
+            return _underscore2.default.filter(this.bonus, { idOwner: playerId, type: type });
         }
     }, {
-        key: 'addBullet',
-        value: function addBullet(arg) {
-            var bullet = new _bullet.Bullet(arg.idOwner, arg.x, arg.y, arg.dirX, arg.dirY);
-            this.bullets.push(bullet);
-        }
-    }, {
-        key: 'removeBullet',
-        value: function removeBullet(bullet) {
-            this.bullets = _underscore2.default.without(this.bullets, bullet);
-        }
-    }, {
-        key: 'removePlayer',
-        value: function removePlayer(player) {
-            this.players = _underscore2.default.without(this.players, player);
-        }
-    }, {
-        key: 'removeDead',
-        value: function removeDead() {
+        key: 'howManyBonus',
+        value: function howManyBonus(playerId) {
+            var nbr = 0;
+
             var _iteratorNormalCompletion = true;
             var _didIteratorError = false;
             var _iteratorError = undefined;
 
             try {
-                for (var _iterator = this.players[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                    var player = _step.value;
+                for (var _iterator = this.bonus[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                    var b = _step.value;
 
-                    if (player.isDead()) {
-                        this.removePlayer(player);
-                    }
+                    if (b.idOwner == playerId) nbr++;
                 }
             } catch (err) {
                 _didIteratorError = true;
@@ -636,6 +872,81 @@ var Game = function () {
                     }
                 }
             }
+
+            return nbr;
+        }
+    }, {
+        key: 'addPlayer',
+        value: function addPlayer(playerId) {
+            if (this.getPlayer(playerId)) {
+                return;
+            }
+            var player = new _player.Player(playerId);
+            this.players.push(player);
+            return player;
+        }
+    }, {
+        key: 'addBullet',
+        value: function addBullet(arg) {
+            var bullet = new _bullet.Bullet(arg.idOwner, arg.x, arg.y, arg.dirX, arg.dirY);
+
+            if (this.howManyBonus(arg.idOwner) > 0) {
+                var b = this.getBonus(arg.idOwner, "bulletBonus")[0];
+                //        console.log(b);
+                if (!engine.isTimeout(b.timeBeginPlayer, b.duration) && b.type == "bulletBonus") {
+                    bullet.setBonusAction(b.effectDammage, b.effectSpeedBullet, b.effectScore);
+                }
+            }
+            this.bullets.push(bullet);
+        }
+    }, {
+        key: 'removeBullet',
+        value: function removeBullet(bullet) {
+            this.bullets = _underscore2.default.without(this.bullets, bullet);
+        }
+    }, {
+        key: 'removePlayer',
+        value: function removePlayer(player) {
+            this.players = _underscore2.default.without(this.players, player);
+        }
+    }, {
+        key: 'removeBonus',
+        value: function removeBonus(bonus) {
+            if (!bonus) return;
+            if (bonus.idOwner > 0 && this.howManyBonus(this.getPlayer(bonus.ownerId)) == 1) {
+                this.getPlayer(bonus.idOwner).setBonus(false);
+            }
+            this.bonus = _underscore2.default.without(this.bonus, bonus);
+        }
+    }, {
+        key: 'removeDead',
+        value: function removeDead() {
+            var _iteratorNormalCompletion2 = true;
+            var _didIteratorError2 = false;
+            var _iteratorError2 = undefined;
+
+            try {
+                for (var _iterator2 = this.players[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+                    var player = _step2.value;
+
+                    if (player.isDead()) {
+                        this.removePlayer(player);
+                    }
+                }
+            } catch (err) {
+                _didIteratorError2 = true;
+                _iteratorError2 = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
+                        _iterator2.return();
+                    }
+                } finally {
+                    if (_didIteratorError2) {
+                        throw _iteratorError2;
+                    }
+                }
+            }
         }
     }, {
         key: 'placePlayer',
@@ -645,13 +956,13 @@ var Game = function () {
             var canSpawn = false;
             while (!canSpawn) {
                 canSpawn = true;
-                var _iteratorNormalCompletion2 = true;
-                var _didIteratorError2 = false;
-                var _iteratorError2 = undefined;
+                var _iteratorNormalCompletion3 = true;
+                var _didIteratorError3 = false;
+                var _iteratorError3 = undefined;
 
                 try {
-                    for (var _iterator2 = this.players[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-                        var playr = _step2.value;
+                    for (var _iterator3 = this.players[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+                        var playr = _step3.value;
 
                         if (engine.collide(playr, tmp)) {
                             tmp = this.map.spawns[Math.floor(Math.random() * this.map.spawns.length)];
@@ -660,16 +971,16 @@ var Game = function () {
                         }
                     }
                 } catch (err) {
-                    _didIteratorError2 = true;
-                    _iteratorError2 = err;
+                    _didIteratorError3 = true;
+                    _iteratorError3 = err;
                 } finally {
                     try {
-                        if (!_iteratorNormalCompletion2 && _iterator2.return) {
-                            _iterator2.return();
+                        if (!_iteratorNormalCompletion3 && _iterator3.return) {
+                            _iterator3.return();
                         }
                     } finally {
-                        if (_didIteratorError2) {
-                            throw _iteratorError2;
+                        if (_didIteratorError3) {
+                            throw _iteratorError3;
                         }
                     }
                 }
@@ -684,13 +995,13 @@ var Game = function () {
             if (this.highscores.length <= 0) {
                 this.highscores.push({ pseudo: player.pseudo, player: player.id, score: player.score });
             }
-            var _iteratorNormalCompletion3 = true;
-            var _didIteratorError3 = false;
-            var _iteratorError3 = undefined;
+            var _iteratorNormalCompletion4 = true;
+            var _didIteratorError4 = false;
+            var _iteratorError4 = undefined;
 
             try {
-                for (var _iterator3 = this.highscores[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-                    var score = _step3.value;
+                for (var _iterator4 = this.highscores[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+                    var score = _step4.value;
 
                     if (player.score > score.score) {
                         var tmp = this.highscores.indexOf(score);
@@ -701,55 +1012,6 @@ var Game = function () {
                         return;
                     }
                 }
-            } catch (err) {
-                _didIteratorError3 = true;
-                _iteratorError3 = err;
-            } finally {
-                try {
-                    if (!_iteratorNormalCompletion3 && _iterator3.return) {
-                        _iterator3.return();
-                    }
-                } finally {
-                    if (_didIteratorError3) {
-                        throw _iteratorError3;
-                    }
-                }
-            }
-        }
-    }, {
-        key: 'onDeath',
-        value: function onDeath(player) {
-            if (!player) return;
-            this.checkForHighScores(player);
-            player.state = "dead";
-        }
-    }, {
-        key: 'updatePlayer',
-        value: function updatePlayer(player) {
-            var oldx = player.x;
-            var oldy = player.y;
-
-            /* update de la position du joueur */
-            player.x += player.dirX * player.speed;
-            player.y += player.dirY * player.speed;
-
-            /* check les collisions avec les murs */
-            var _iteratorNormalCompletion4 = true;
-            var _didIteratorError4 = false;
-            var _iteratorError4 = undefined;
-
-            try {
-                for (var _iterator4 = this.map.walls[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-                    var wall = _step4.value;
-
-                    if (engine.collide(wall, player)) {
-                        /* si colision retour à l'ancienne position */
-                        player.x = oldx;
-                        player.y = oldy;
-                        return;
-                    }
-                }
-                /* check les collisions entre joueurs */
             } catch (err) {
                 _didIteratorError4 = true;
                 _iteratorError4 = err;
@@ -764,20 +1026,33 @@ var Game = function () {
                     }
                 }
             }
-
+        }
+    }, {
+        key: 'onDeath',
+        value: function onDeath(player) {
+            if (!player) return;
+            this.checkForHighScores(player);
+            player.state = "dead";
+        }
+    }, {
+        key: 'bonusCollision',
+        value: function bonusCollision(player) {
+            /*check les  collisions avec bonus*/
             var _iteratorNormalCompletion5 = true;
             var _didIteratorError5 = false;
             var _iteratorError5 = undefined;
 
             try {
-                for (var _iterator5 = this.players[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-                    var playr = _step5.value;
+                for (var _iterator5 = this.bonus[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+                    var b = _step5.value;
 
-                    if (engine.collide(playr, player) && playr.id != player.id) {
-                        /* si colision retour à l'ancienne position */
-                        player.x = oldx;
-                        player.y = oldy;
-                        return;
+                    if (engine.collide(player, b)) {
+                        if (this.howManyBonus(player.id) > 1 && this.getBonus(player.id, b.type > 0)) {
+                            this.removeBonus(_underscore2.default.findWhere(this.bonus, { id: player.id, type: b.type }));
+                        }
+                        b.setOwner(player.id);
+                        player.setBonus(true);
+                        b.setTimeBeginPlayer();
                     }
                 }
             } catch (err) {
@@ -796,8 +1071,16 @@ var Game = function () {
             }
         }
     }, {
-        key: 'updateBullet',
-        value: function updateBullet(bullet) {
+        key: 'updatePlayer',
+        value: function updatePlayer(player) {
+            var oldx = player.x;
+            var oldy = player.y;
+
+            /* update de la position du joueur */
+            player.x += player.dirX * player.speed;
+            player.y += player.dirY * player.speed;
+
+            /* check les collisions avec les murs */
             var _iteratorNormalCompletion6 = true;
             var _didIteratorError6 = false;
             var _iteratorError6 = undefined;
@@ -806,11 +1089,14 @@ var Game = function () {
                 for (var _iterator6 = this.map.walls[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
                     var wall = _step6.value;
 
-                    if (engine.collide(wall, bullet)) {
-                        this.removeBullet(bullet);
+                    if (engine.collide(wall, player)) {
+                        /* si colision retour à l'ancienne position */
+                        player.x = oldx;
+                        player.y = oldy;
                         return;
                     }
                 }
+                /* check les collisions entre joueurs */
             } catch (err) {
                 _didIteratorError6 = true;
                 _iteratorError6 = err;
@@ -832,15 +1118,12 @@ var Game = function () {
 
             try {
                 for (var _iterator7 = this.players[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
-                    var player = _step7.value;
+                    var playr = _step7.value;
 
-                    if (bullet.didTouch(player)) {
-                        player.getTouched(bullet);
-                        this.getPlayer(bullet.idOwner).ennemyTouched(bullet);
-                        this.removeBullet(bullet);
-                        if (player.isDead()) {
-                            this.onDeath(player);
-                        }
+                    if (engine.collide(playr, player) && playr.id != player.id) {
+                        /* si colision retour à l'ancienne position */
+                        player.x = oldx;
+                        player.y = oldy;
                         return;
                     }
                 }
@@ -859,21 +1142,23 @@ var Game = function () {
                 }
             }
 
-            bullet.x += bullet.dirX * bullet.speed;
-            bullet.y += bullet.dirY * bullet.speed;
+            this.bonusCollision(player);
         }
     }, {
-        key: 'updateWorld',
-        value: function updateWorld() {
+        key: 'updateBullet',
+        value: function updateBullet(bullet) {
             var _iteratorNormalCompletion8 = true;
             var _didIteratorError8 = false;
             var _iteratorError8 = undefined;
 
             try {
-                for (var _iterator8 = this.players[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
-                    var player = _step8.value;
+                for (var _iterator8 = this.map.walls[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
+                    var wall = _step8.value;
 
-                    this.updatePlayer(player);
+                    if (engine.collide(wall, bullet)) {
+                        this.removeBullet(bullet);
+                        return;
+                    }
                 }
             } catch (err) {
                 _didIteratorError8 = true;
@@ -895,10 +1180,18 @@ var Game = function () {
             var _iteratorError9 = undefined;
 
             try {
-                for (var _iterator9 = this.bullets[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
-                    var bullet = _step9.value;
+                for (var _iterator9 = this.players[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
+                    var player = _step9.value;
 
-                    this.updateBullet(bullet);
+                    if (bullet.didTouch(player)) {
+                        player.getTouched(bullet);
+                        this.getPlayer(bullet.idOwner).ennemyTouched(bullet);
+                        this.removeBullet(bullet);
+                        if (player.isDead()) {
+                            this.onDeath(player);
+                        }
+                        return;
+                    }
                 }
             } catch (err) {
                 _didIteratorError9 = true;
@@ -914,6 +1207,140 @@ var Game = function () {
                     }
                 }
             }
+
+            bullet.x += bullet.dirX * bullet.speed;
+            bullet.y += bullet.dirY * bullet.speed;
+        }
+    }, {
+        key: 'updateWorld',
+        value: function updateWorld() {
+            var _iteratorNormalCompletion10 = true;
+            var _didIteratorError10 = false;
+            var _iteratorError10 = undefined;
+
+            try {
+                for (var _iterator10 = this.players[Symbol.iterator](), _step10; !(_iteratorNormalCompletion10 = (_step10 = _iterator10.next()).done); _iteratorNormalCompletion10 = true) {
+                    var player = _step10.value;
+
+                    this.updatePlayer(player);
+                }
+            } catch (err) {
+                _didIteratorError10 = true;
+                _iteratorError10 = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion10 && _iterator10.return) {
+                        _iterator10.return();
+                    }
+                } finally {
+                    if (_didIteratorError10) {
+                        throw _iteratorError10;
+                    }
+                }
+            }
+
+            var _iteratorNormalCompletion11 = true;
+            var _didIteratorError11 = false;
+            var _iteratorError11 = undefined;
+
+            try {
+                for (var _iterator11 = this.bullets[Symbol.iterator](), _step11; !(_iteratorNormalCompletion11 = (_step11 = _iterator11.next()).done); _iteratorNormalCompletion11 = true) {
+                    var bullet = _step11.value;
+
+                    this.updateBullet(bullet);
+                }
+            } catch (err) {
+                _didIteratorError11 = true;
+                _iteratorError11 = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion11 && _iterator11.return) {
+                        _iterator11.return();
+                    }
+                } finally {
+                    if (_didIteratorError11) {
+                        throw _iteratorError11;
+                    }
+                }
+            }
+        }
+    }, {
+        key: 'generateBonus',
+        value: function generateBonus() {
+            var bonus = _underscore2.default.findWhere(config.bonus, { bonusId: Math.floor(Math.random() * config.bonus.length) });
+
+            var tmpObj = { x: 0, y: 0, width: 15, height: 15 };
+            var canSpawn = false;
+            while (!canSpawn) {
+                canSpawn = true;
+                tmpObj.x = Math.floor(Math.random() * 1000);
+                tmpObj.y = Math.floor(Math.random() * 600);
+                var _iteratorNormalCompletion12 = true;
+                var _didIteratorError12 = false;
+                var _iteratorError12 = undefined;
+
+                try {
+                    for (var _iterator12 = this.map.walls[Symbol.iterator](), _step12; !(_iteratorNormalCompletion12 = (_step12 = _iterator12.next()).done); _iteratorNormalCompletion12 = true) {
+                        var wall = _step12.value;
+
+                        if (engine.collide(tmpObj, wall)) {
+                            canSpawn = false;
+                        }
+                    }
+                } catch (err) {
+                    _didIteratorError12 = true;
+                    _iteratorError12 = err;
+                } finally {
+                    try {
+                        if (!_iteratorNormalCompletion12 && _iterator12.return) {
+                            _iterator12.return();
+                        }
+                    } finally {
+                        if (_didIteratorError12) {
+                            throw _iteratorError12;
+                        }
+                    }
+                }
+            }
+
+            //console.log("add new bonus");
+            var newBonus = new _bonus.Bonus(this.idBonus++, Math.floor(Date.now() / 1000), bonus.type, bonus.name, bonus.effectLife, bonus.effectDammage, bonus.effectSpeedOwner, bonus.effectSpeedBullet, bonus.effectScore);
+            newBonus.setCoordonnes(tmpObj.x, tmpObj.y);
+            this.bonus.push(newBonus);
+        }
+    }, {
+        key: 'refreshBonusList',
+        value: function refreshBonusList() {
+            var _iteratorNormalCompletion13 = true;
+            var _didIteratorError13 = false;
+            var _iteratorError13 = undefined;
+
+            try {
+                for (var _iterator13 = this.bonus[Symbol.iterator](), _step13; !(_iteratorNormalCompletion13 = (_step13 = _iterator13.next()).done); _iteratorNormalCompletion13 = true) {
+                    var b = _step13.value;
+
+                    //pas de proprietaire
+                    if (b.idOwner == 0 && engine.isTimeout(b.timeBeginMap, b.duration)) {
+                        this.removeBonus(b);
+                    }
+                    if (b.idOwner > 0 && engine.isTimeout(b.timeBeginPlayer, b.duration)) {
+                        this.removeBonus(b);
+                    }
+                }
+            } catch (err) {
+                _didIteratorError13 = true;
+                _iteratorError13 = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion13 && _iterator13.return) {
+                        _iterator13.return();
+                    }
+                } finally {
+                    if (_didIteratorError13) {
+                        throw _iteratorError13;
+                    }
+                }
+            }
         }
     }]);
 
@@ -922,7 +1349,7 @@ var Game = function () {
 
 exports.Game = Game;
 
-},{"./bullet.js":1,"./config.json":3,"./engine.js":4,"./map.js":6,"./player.js":61,"underscore":58}],6:[function(require,module,exports){
+},{"./bonus.js":1,"./bullet.js":2,"./config.json":4,"./engine.js":5,"./map.js":7,"./player.js":62,"underscore":59}],7:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -983,6 +1410,17 @@ var Map = function () {
             renderer.drawImg(canv, bullet.x, bullet.y, bullet.width, bullet.height, img);
         }
     }, {
+        key: 'drawBonus',
+        value: function drawBonus(canv, bonus, img) {
+            // console.log("Draw bonus");
+            renderer.drawImg(canv, bonus.x, bonus.y, bonus.width, bonus.height, img);
+        }
+    }, {
+        key: 'drawMapObject',
+        value: function drawMapObject(canv, obj, img) {
+            renderer.drawImg(canv, obj.x, obj.y, obj.width, obj.height, img);
+        }
+    }, {
         key: 'drawPlayer',
         value: function drawPlayer(canv, player, pseudo, img) {
             /* pre rendering */
@@ -1015,7 +1453,7 @@ var Map = function () {
 
 exports.Map = Map;
 
-},{"./renderer.js":62}],7:[function(require,module,exports){
+},{"./renderer.js":63}],8:[function(require,module,exports){
 module.exports = after
 
 function after(count, callback, err_cb) {
@@ -1045,7 +1483,7 @@ function after(count, callback, err_cb) {
 
 function noop() {}
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 /**
  * An abstraction for slicing an arraybuffer even when
  * ArrayBuffer.prototype.slice is not supported
@@ -1076,7 +1514,7 @@ module.exports = function(arraybuffer, start, end) {
   return result.buffer;
 };
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 
 /**
  * Expose `Backoff`.
@@ -1163,7 +1601,7 @@ Backoff.prototype.setJitter = function(jitter){
 };
 
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 /*
  * base64-arraybuffer
  * https://github.com/niklasvh/base64-arraybuffer
@@ -1232,7 +1670,7 @@ Backoff.prototype.setJitter = function(jitter){
   };
 })();
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 (function (global){
 /**
  * Create a blob builder even when vendor prefixes exist
@@ -1332,9 +1770,9 @@ module.exports = (function() {
 })();
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],12:[function(require,module,exports){
-
 },{}],13:[function(require,module,exports){
+
+},{}],14:[function(require,module,exports){
 /**
  * Slice reference.
  */
@@ -1359,7 +1797,7 @@ module.exports = function(obj, fn){
   }
 };
 
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 
 /**
  * Expose `Emitter`.
@@ -1525,7 +1963,7 @@ Emitter.prototype.hasListeners = function(event){
   return !! this.listeners(event).length;
 };
 
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 
 module.exports = function(a, b){
   var fn = function(){};
@@ -1533,11 +1971,11 @@ module.exports = function(a, b){
   a.prototype = new fn;
   a.prototype.constructor = a;
 };
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 
 module.exports = require('./lib/index');
 
-},{"./lib/index":17}],17:[function(require,module,exports){
+},{"./lib/index":18}],18:[function(require,module,exports){
 
 module.exports = require('./socket');
 
@@ -1549,7 +1987,7 @@ module.exports = require('./socket');
  */
 module.exports.parser = require('engine.io-parser');
 
-},{"./socket":18,"engine.io-parser":30}],18:[function(require,module,exports){
+},{"./socket":19,"engine.io-parser":31}],19:[function(require,module,exports){
 (function (global){
 /**
  * Module dependencies.
@@ -2291,7 +2729,7 @@ Socket.prototype.filterUpgrades = function (upgrades) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./transport":19,"./transports/index":20,"component-emitter":26,"debug":27,"engine.io-parser":30,"indexof":34,"parsejson":38,"parseqs":39,"parseuri":40}],19:[function(require,module,exports){
+},{"./transport":20,"./transports/index":21,"component-emitter":27,"debug":28,"engine.io-parser":31,"indexof":35,"parsejson":39,"parseqs":40,"parseuri":41}],20:[function(require,module,exports){
 /**
  * Module dependencies.
  */
@@ -2450,7 +2888,7 @@ Transport.prototype.onClose = function () {
   this.emit('close');
 };
 
-},{"component-emitter":26,"engine.io-parser":30}],20:[function(require,module,exports){
+},{"component-emitter":27,"engine.io-parser":31}],21:[function(require,module,exports){
 (function (global){
 /**
  * Module dependencies
@@ -2507,7 +2945,7 @@ function polling (opts) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./polling-jsonp":21,"./polling-xhr":22,"./websocket":24,"xmlhttprequest-ssl":25}],21:[function(require,module,exports){
+},{"./polling-jsonp":22,"./polling-xhr":23,"./websocket":25,"xmlhttprequest-ssl":26}],22:[function(require,module,exports){
 (function (global){
 
 /**
@@ -2742,7 +3180,7 @@ JSONPPolling.prototype.doWrite = function (data, fn) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./polling":23,"component-inherit":15}],22:[function(require,module,exports){
+},{"./polling":24,"component-inherit":16}],23:[function(require,module,exports){
 (function (global){
 /**
  * Module requirements.
@@ -3170,7 +3608,7 @@ function unloadHandler () {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./polling":23,"component-emitter":26,"component-inherit":15,"debug":27,"xmlhttprequest-ssl":25}],23:[function(require,module,exports){
+},{"./polling":24,"component-emitter":27,"component-inherit":16,"debug":28,"xmlhttprequest-ssl":26}],24:[function(require,module,exports){
 /**
  * Module dependencies.
  */
@@ -3417,7 +3855,7 @@ Polling.prototype.uri = function () {
   return schema + '://' + (ipv6 ? '[' + this.hostname + ']' : this.hostname) + port + this.path + query;
 };
 
-},{"../transport":19,"component-inherit":15,"debug":27,"engine.io-parser":30,"parseqs":39,"xmlhttprequest-ssl":25,"yeast":60}],24:[function(require,module,exports){
+},{"../transport":20,"component-inherit":16,"debug":28,"engine.io-parser":31,"parseqs":40,"xmlhttprequest-ssl":26,"yeast":61}],25:[function(require,module,exports){
 (function (global){
 /**
  * Module dependencies.
@@ -3706,7 +4144,7 @@ WS.prototype.check = function () {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../transport":19,"component-inherit":15,"debug":27,"engine.io-parser":30,"parseqs":39,"ws":12,"yeast":60}],25:[function(require,module,exports){
+},{"../transport":20,"component-inherit":16,"debug":28,"engine.io-parser":31,"parseqs":40,"ws":13,"yeast":61}],26:[function(require,module,exports){
 (function (global){
 // browser shim for xmlhttprequest module
 
@@ -3747,7 +4185,7 @@ module.exports = function (opts) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"has-cors":33}],26:[function(require,module,exports){
+},{"has-cors":34}],27:[function(require,module,exports){
 
 /**
  * Expose `Emitter`.
@@ -3912,7 +4350,7 @@ Emitter.prototype.hasListeners = function(event){
   return !! this.listeners(event).length;
 };
 
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 (function (process){
 
 /**
@@ -4093,7 +4531,7 @@ function localstorage(){
 }
 
 }).call(this,require('_process'))
-},{"./debug":28,"_process":41}],28:[function(require,module,exports){
+},{"./debug":29,"_process":42}],29:[function(require,module,exports){
 
 /**
  * This is the common logic for both the Node.js and web browser
@@ -4295,7 +4733,7 @@ function coerce(val) {
   return val;
 }
 
-},{"ms":29}],29:[function(require,module,exports){
+},{"ms":30}],30:[function(require,module,exports){
 /**
  * Helpers.
  */
@@ -4446,7 +4884,7 @@ function plural(ms, n, name) {
   return Math.ceil(ms / n) + ' ' + name + 's'
 }
 
-},{}],30:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 (function (global){
 /**
  * Module dependencies.
@@ -5059,7 +5497,7 @@ exports.decodePayloadAsBinary = function (data, binaryType, callback) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./keys":31,"after":7,"arraybuffer.slice":8,"base64-arraybuffer":10,"blob":11,"has-binary":32,"wtf-8":59}],31:[function(require,module,exports){
+},{"./keys":32,"after":8,"arraybuffer.slice":9,"base64-arraybuffer":11,"blob":12,"has-binary":33,"wtf-8":60}],32:[function(require,module,exports){
 
 /**
  * Gets the keys for an object.
@@ -5080,7 +5518,7 @@ module.exports = Object.keys || function keys (obj){
   return arr;
 };
 
-},{}],32:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 (function (global){
 
 /*
@@ -5143,7 +5581,7 @@ function hasBinary(data) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"isarray":35}],33:[function(require,module,exports){
+},{"isarray":36}],34:[function(require,module,exports){
 
 /**
  * Module exports.
@@ -5162,7 +5600,7 @@ try {
   module.exports = false;
 }
 
-},{}],34:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 
 var indexOf = [].indexOf;
 
@@ -5173,12 +5611,12 @@ module.exports = function(arr, obj){
   }
   return -1;
 };
-},{}],35:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 module.exports = Array.isArray || function (arr) {
   return Object.prototype.toString.call(arr) == '[object Array]';
 };
 
-},{}],36:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v3.2.1
  * https://jquery.com/
@@ -15433,7 +15871,7 @@ if ( !noGlobal ) {
 return jQuery;
 } );
 
-},{}],37:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 (function (global){
 /*! JSON v3.3.2 | http://bestiejs.github.io/json3 | Copyright 2012-2014, Kit Cambridge | http://kit.mit-license.org */
 ;(function () {
@@ -16339,7 +16777,7 @@ return jQuery;
 }).call(this);
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],38:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 (function (global){
 /**
  * JSON parse.
@@ -16374,7 +16812,7 @@ module.exports = function parsejson(data) {
   }
 };
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],39:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 /**
  * Compiles a querystring
  * Returns string representation of the object
@@ -16413,7 +16851,7 @@ exports.decode = function(qs){
   return qry;
 };
 
-},{}],40:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 /**
  * Parses an URI
  *
@@ -16454,7 +16892,7 @@ module.exports = function parseuri(str) {
     return uri;
 };
 
-},{}],41:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -16640,7 +17078,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],42:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -16751,7 +17189,7 @@ exports.connect = lookup;
 exports.Manager = require('./manager');
 exports.Socket = require('./socket');
 
-},{"./manager":43,"./socket":45,"./url":46,"debug":48,"socket.io-parser":52}],43:[function(require,module,exports){
+},{"./manager":44,"./socket":46,"./url":47,"debug":49,"socket.io-parser":53}],44:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -17313,7 +17751,7 @@ Manager.prototype.onreconnect = function () {
   this.emitAll('reconnect', attempt);
 };
 
-},{"./on":44,"./socket":45,"backo2":9,"component-bind":13,"component-emitter":47,"debug":48,"engine.io-client":16,"indexof":34,"socket.io-parser":52}],44:[function(require,module,exports){
+},{"./on":45,"./socket":46,"backo2":10,"component-bind":14,"component-emitter":48,"debug":49,"engine.io-client":17,"indexof":35,"socket.io-parser":53}],45:[function(require,module,exports){
 
 /**
  * Module exports.
@@ -17339,7 +17777,7 @@ function on (obj, ev, fn) {
   };
 }
 
-},{}],45:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -17760,7 +18198,7 @@ Socket.prototype.compress = function (compress) {
   return this;
 };
 
-},{"./on":44,"component-bind":13,"component-emitter":47,"debug":48,"has-binary":32,"socket.io-parser":52,"to-array":57}],46:[function(require,module,exports){
+},{"./on":45,"component-bind":14,"component-emitter":48,"debug":49,"has-binary":33,"socket.io-parser":53,"to-array":58}],47:[function(require,module,exports){
 (function (global){
 
 /**
@@ -17839,15 +18277,15 @@ function url (uri, loc) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"debug":48,"parseuri":40}],47:[function(require,module,exports){
-arguments[4][26][0].apply(exports,arguments)
-},{"dup":26}],48:[function(require,module,exports){
+},{"debug":49,"parseuri":41}],48:[function(require,module,exports){
 arguments[4][27][0].apply(exports,arguments)
-},{"./debug":49,"_process":41,"dup":27}],49:[function(require,module,exports){
+},{"dup":27}],49:[function(require,module,exports){
 arguments[4][28][0].apply(exports,arguments)
-},{"dup":28,"ms":50}],50:[function(require,module,exports){
+},{"./debug":50,"_process":42,"dup":28}],50:[function(require,module,exports){
 arguments[4][29][0].apply(exports,arguments)
-},{"dup":29}],51:[function(require,module,exports){
+},{"dup":29,"ms":51}],51:[function(require,module,exports){
+arguments[4][30][0].apply(exports,arguments)
+},{"dup":30}],52:[function(require,module,exports){
 (function (global){
 /*global Blob,File*/
 
@@ -17992,7 +18430,7 @@ exports.removeBlobs = function(data, callback) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./is-buffer":53,"isarray":35}],52:[function(require,module,exports){
+},{"./is-buffer":54,"isarray":36}],53:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -18398,7 +18836,7 @@ function error(data){
   };
 }
 
-},{"./binary":51,"./is-buffer":53,"component-emitter":14,"debug":54,"json3":37}],53:[function(require,module,exports){
+},{"./binary":52,"./is-buffer":54,"component-emitter":15,"debug":55,"json3":38}],54:[function(require,module,exports){
 (function (global){
 
 module.exports = isBuf;
@@ -18415,7 +18853,7 @@ function isBuf(obj) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],54:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 
 /**
  * This is the web browser implementation of `debug()`.
@@ -18585,7 +19023,7 @@ function localstorage(){
   } catch (e) {}
 }
 
-},{"./debug":55}],55:[function(require,module,exports){
+},{"./debug":56}],56:[function(require,module,exports){
 
 /**
  * This is the common logic for both the Node.js and web browser
@@ -18784,7 +19222,7 @@ function coerce(val) {
   return val;
 }
 
-},{"ms":56}],56:[function(require,module,exports){
+},{"ms":57}],57:[function(require,module,exports){
 /**
  * Helpers.
  */
@@ -18911,7 +19349,7 @@ function plural(ms, n, name) {
   return Math.ceil(ms / n) + ' ' + name + 's';
 }
 
-},{}],57:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 module.exports = toArray
 
 function toArray(list, index) {
@@ -18926,7 +19364,7 @@ function toArray(list, index) {
     return array
 }
 
-},{}],58:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 //     Underscore.js 1.8.3
 //     http://underscorejs.org
 //     (c) 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -20476,7 +20914,7 @@ function toArray(list, index) {
   }
 }.call(this));
 
-},{}],59:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
 (function (global){
 /*! https://mths.be/wtf8 v1.0.0 by @mathias */
 ;(function(root) {
@@ -20714,7 +21152,7 @@ function toArray(list, index) {
 }(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],60:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 'use strict';
 
 var alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_'.split('')
@@ -20784,7 +21222,7 @@ yeast.encode = encode;
 yeast.decode = decode;
 module.exports = yeast;
 
-},{}],61:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20813,8 +21251,7 @@ var Player = function () {
         this.width = 24;
         this.height = 30;
         this.avatar = "avatar" + Math.floor(Math.random() * 5 + 1);
-        //this.bonus = new Bonus();
-        //this.malus = new Malus();
+        this.bonus = false;
     }
 
     _createClass(Player, [{
@@ -20837,6 +21274,11 @@ var Player = function () {
         value: function isDead() {
             return this.lifepoints <= 0;
         }
+    }, {
+        key: "setBonus",
+        value: function setBonus(bool) {
+            this.bonus = bool;
+        }
     }]);
 
     return Player;
@@ -20844,7 +21286,7 @@ var Player = function () {
 
 exports.Player = Player;
 
-},{}],62:[function(require,module,exports){
+},{}],63:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20875,4 +21317,4 @@ exports.drawElement = drawElement;
 exports.drawImg = drawImg;
 exports.drawText = drawText;
 
-},{}]},{},[2]);
+},{}]},{},[3]);

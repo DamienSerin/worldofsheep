@@ -6,6 +6,7 @@ import {Map} from './map.js';
 import {Bullet} from './bullet.js';
 import * as renderer from './renderer.js';
 import * as engine from './engine.js';
+const config = require('./config.json');
 
 /* pour tester: https://worldofsheep-sandra-laduranti.c9users.io:8080*/
 
@@ -29,15 +30,20 @@ tmp_canvas.height = 600;
 
 let lifeimg = document.getElementById('lifepoints');
 //let avatar = document.getElementById('avatar1down');
-let bulletimg1 = document.getElementById('bullet1');
+let bulletimg1 = document.getElementById('bullet');
+let bonusimg1 = document.getElementById('bonus1');
 
 let avatars = [];
+let bonusimg = [];
 
 let dead = false;
 let myPlayerId = -1;
 let oldplayers = null;
 let players = null;
 let bullets = null;
+let oldbonus = null;
+let bonus = null;
+let mybonus = null;
 let map = new Map();
 let highscores = null;
 let pseudo;
@@ -50,6 +56,10 @@ function initImg(){
         for (let d of dir){
             avatars.push(document.getElementById('avatar'+iter+d));
         }
+    }
+    
+    for (let bon of config.bonus){
+        bonusimg.push(document.getElementById(bon.name));
     }
 }
 
@@ -83,6 +93,7 @@ socket.on('updateWorld', function(nWorld){
       renderWorld();
     }
 });
+
 
 socket.on('death', function(){
     death();
@@ -121,7 +132,17 @@ function isHUDDirty(){
             if (player.pseudo != oldplayer.pseudo) return true;
             if (player.lifepoints != oldplayers.lifepoints) return true;
         }
+    }
+    
+    if (!oldbonus) return true;
+    
+    if (mybonus){
+        if (mybonus.length != oldbonus.length) return true;
         
+        for (let b of mybonus){
+            let oldb = _.findWhere(oldbonus, {id: oldb.id});
+            if (!oldb) return true;
+        }
     }
 
     
@@ -135,6 +156,7 @@ function updateHUD(){
     
     if (dirty){
         let y = 5;
+        let x = 0;
         players = _.sortBy(players,'score');
         ctxhud.clearRect(0,0,canvasHUD.width, canvasHUD.height);
         
@@ -143,10 +165,17 @@ function updateHUD(){
         renderer.drawImg(ctxhud,0,5,20,20,lifeimg);
         renderer.drawText(ctxhud, 24,20, _.findWhere(players, {id: myPlayerId}).lifepoints);
 
-        y = y + 40;
+        x = 60;
+        for(let b of mybonus){
+            renderer.drawImg(ctxhud,x,5,15,15,_.findWhere(bonusimg,{id:b.name}));
+            x+= 20;
+        }
+
+        y += 40;
         renderer.drawText(ctxhud,0,y, "Liste des joueurs: ")
         for(let player of players){
-            let text = player.pseudo + " : " + player.score +" points";
+            let point = player.score > 1 ? "points" : "point";
+            let text = player.pseudo + " : " + player.score + point;
             y += 25;
             renderer.drawText(ctxhud,0,y,text);
         }
@@ -170,7 +199,6 @@ function renderWorld(){
     ctxfg.clearRect(0, 0, canvasfg.width, canvasfg.height);
     for(let player of players){
         if (player.id != myPlayerId){
-           // _.findWhere(players, {id: myPlayerId});
             map.drawPlayer(ctxfg, player, player.pseudo, _.findWhere(avatars, {id: getAvatarDirection(player)}));
         }
         else{
@@ -182,14 +210,25 @@ function renderWorld(){
         map.drawBullet(ctxfg, bullet, bulletimg1);
     }
     
+    for(let b of bonus){
+        // && engine.isTimeout(b.timeBeginMap, b.duration)
+        if(b.idOwner == 0){
+            map.drawBonus(ctxfg, b, _.findWhere(bonusimg, {id:b.name}));
+        }
+    }
+    
     updateHUD();
 }
 
 function convertNewWorld(nWorld){
     oldplayers = players;
     players = JSON.parse(nWorld.players);
-    //let tmp = JSON.parse(nWorld.map);
     bullets = JSON.parse(nWorld.bullets);
+    if (nWorld.bonus.length > 0){
+        bonus = JSON.parse(nWorld.bonus);
+        oldbonus = mybonus;
+        mybonus = _.filter(bonus,{idOwner: myPlayerId});
+    }
 }
 
 $(document).on('keydown', function(event){
@@ -255,7 +294,3 @@ $(document).on('mousedown', function(event){
     }
 });
 
-/*let pseudo = prompt("Veuillez saisir votre pseudo pour jouer","Bob");
-if(pseudo!=null){
-console.log("pseudo: "+ pseudo)
-*/

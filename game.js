@@ -2,6 +2,7 @@ import _ from 'underscore';
 import {Player} from './player.js';
 import {Map} from './map.js';
 import {Bullet} from './bullet.js';
+import {Bonus} from './bonus.js';
 const config = require('./config.json');
 import * as engine from './engine.js';
 
@@ -12,12 +13,27 @@ class Game {
         this.highscores = [ ];
         this.map = new Map();
         this.map.generateMap(config.map1);
+        this.bonus = [ ];
+        this.idBonus = 0;
     }
 
     getPlayer(playerId){
         return _.findWhere(this.players, {id: playerId});
     }
     
+    getBonus(playerId, type){
+        return _.filter(this.bonus, {idOwner: playerId, type:type});
+    }
+    
+    
+    howManyBonus(playerId){
+        let nbr = 0;
+        
+        for(let b of this.bonus){
+            if (b.idOwner == playerId) nbr++;    
+        }
+        return nbr;
+    }
 
     addPlayer(playerId){
         if(this.getPlayer(playerId)){
@@ -27,10 +43,17 @@ class Game {
         this.players.push(player);
         return player;
     }
-    
 
     addBullet(arg){
-        let bullet = new Bullet(arg.idOwner, arg.x, arg.y, arg.dirX, arg.dirY);
+         let bullet = new Bullet(arg.idOwner, arg.x, arg.y, arg.dirX, arg.dirY);
+        
+        if (this.howManyBonus(arg.idOwner) > 0){
+            let b = this.getBonus(arg.idOwner, "bulletBonus")[0];
+    //        console.log(b);
+            if(!engine.isTimeout(b.timeBeginPlayer, b.duration) && b.type == "bulletBonus"){
+                    bullet.setBonusAction(b.effectDammage, b.effectSpeedBullet, b.effectScore);
+           }
+        }
         this.bullets.push(bullet);
     }
 
@@ -40,6 +63,14 @@ class Game {
 
     removePlayer(player){
         this.players = _.without(this.players, player);
+    }
+    
+    removeBonus(bonus){
+        if (!bonus) return;
+        if (bonus.idOwner > 0 && this.howManyBonus(this.getPlayer(bonus.ownerId)) == 1){
+            this.getPlayer(bonus.idOwner).setBonus(false);
+        }
+        this.bonus = _.without(this.bonus, bonus);
     }
 
     removeDead(){
@@ -91,6 +122,20 @@ class Game {
         this.checkForHighScores(player);
         player.state = "dead";
     }
+    
+    bonusCollision(player){
+        /*check les  collisions avec bonus*/
+        for(let b of this.bonus){
+            if(engine.collide(player, b)){
+                if(this.howManyBonus(player.id) > 1 && (this.getBonus(player.id, b.type > 0))){
+                    this.removeBonus(_.findWhere(this.bonus, {id:player.id, type:b.type}));
+                }
+                b.setOwner(player.id);
+                player.setBonus(true);
+                b.setTimeBeginPlayer();
+            }
+        }
+    }
 
     updatePlayer(player){
         let oldx = player.x;
@@ -119,6 +164,7 @@ class Game {
             }
         }
         
+        this.bonusCollision(player);
     }
 
     updateBullet(bullet){
@@ -152,6 +198,41 @@ class Game {
             this.updateBullet(bullet);
         }
     }
+    
+    generateBonus(){
+        let bonus = _.findWhere(config.bonus, {bonusId: Math.floor((Math.random() * config.bonus.length))});
+
+        let tmpObj = {x: 0, y: 0, width: 15, height: 15}; 
+        let canSpawn = false;
+        while(!canSpawn){
+            canSpawn = true;
+            tmpObj.x = Math.floor(Math.random() * 1000);
+            tmpObj.y = Math.floor(Math.random() * 600);
+            for(let wall of this.map.walls){
+                if (engine.collide(tmpObj, wall)){
+                    canSpawn = false;
+                }
+            }
+        }
+        
+        //console.log("add new bonus");
+        let newBonus = new Bonus(this.idBonus++, Math.floor(Date.now() / 1000), bonus.type, bonus.name, bonus.effectLife, bonus.effectDammage, bonus.effectSpeedOwner, bonus.effectSpeedBullet, bonus.effectScore);
+        newBonus.setCoordonnes(tmpObj.x, tmpObj.y);
+        this.bonus.push(newBonus);
+    }
+    
+    refreshBonusList(){
+        for (let b of this.bonus){
+            //pas de proprietaire
+            if(b.idOwner == 0 && engine.isTimeout(b.timeBeginMap, b.duration)){
+                this.removeBonus(b);
+            }
+            if(b.idOwner > 0 && engine.isTimeout(b.timeBeginPlayer, b.duration)){
+                this.removeBonus(b);
+            }
+        }
+    }
+    
 }
 
 export {Game};

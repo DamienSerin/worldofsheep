@@ -39,7 +39,13 @@ function processInput(player, key){
 	
 }
 
+function isTimeout(time, duration){
+	return (Math.floor(Date.now() / 1000) - time) > duration;
+}
+
+
 export {
     collide,
+    isTimeout,
     processInput
 };

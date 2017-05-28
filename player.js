@@ -14,8 +14,7 @@ class Player {
         this.width = 24;
         this.height = 30;
         this.avatar = "avatar" + Math.floor((Math.random() * 5) + 1);
-        //this.bonus = new Bonus();
-        //this.malus = new Malus();
+        this.bonus = false;
     }
     
     setPseudo(pseudo){
@@ -33,6 +32,10 @@ class Player {
 
     isDead(){
         return this.lifepoints <= 0;
+    }
+    
+    setBonus(bool){
+        this.bonus = bool;
     }
 
 

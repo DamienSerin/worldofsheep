@@ -37,6 +37,15 @@ class Map{
     drawBullet(canv, bullet, img){
         renderer.drawImg(canv, bullet.x,bullet.y,bullet.width, bullet.height, img);
     }
+    
+      drawBonus(canv, bonus, img){
+         // console.log("Draw bonus");
+        renderer.drawImg(canv, bonus.x,bonus.y,bonus.width, bonus.height, img);
+    }
+    
+    drawMapObject(canv, obj, img){
+        renderer.drawImg(canv, obj.x,obj.y,obj.width, obj.height, img);
+    }
 
     drawPlayer(canv, player, pseudo, img) {
         /* pre rendering */
