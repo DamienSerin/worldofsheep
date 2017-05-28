@@ -18,7 +18,6 @@ const game = new Game();
 var nextPlayerId = 1;
 
 
-/* ACTUELLEMENT NE SUPPORTE PAS PLUS DE 3 CONNECTES SIMULTANES*/ 
 io.sockets.on('connection', socket => {
 
     let playerId = nextPlayerId;
