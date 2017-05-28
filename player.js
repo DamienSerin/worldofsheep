@@ -27,7 +27,12 @@ class Player {
     }
 
     ennemyTouched(bullet){
-        this.score += bullet.scoreIncrease;
+        if(bullet){
+            this.score += bullet.scoreIncrease;
+        }
+        else{
+            this.score += 1;
+        }
     }
 
     isDead(){

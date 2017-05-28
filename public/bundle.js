@@ -727,9 +727,9 @@ module.exports={
     "bonus": [{"bonusId":0, "type":"shield", "name": "Shield", "effectLife":100, "effectDammage":0,"effectSpeedOwner":0, "effectSpeedBullet":0, "effectScore":0},
     {"bonusId":1, "type":"bulletBonus", "name": "MasterBullet", "effectLife":0, "effectDammage":2,"effectSpeedOwner":0, "effectSpeedBullet":0, "effectScore":2},
     {"bonusId":2, "type":"bulletBonus","name" : "GodOfBullet", "effectLife":0, "effectDammage":4,"effectSpeedOwner":0, "effectSpeedBullet":-0.2, "effectScore":4},
-    {"bonusId":3, "type":"playerBonus","name" : "BonusSpeed", "effectLife":0, "effectDammage":0,"effectSpeedOwner":0.2, "effectSpeedBullet":0, "effectScore":0},
+    {"bonusId":3, "type":"playerBonus","name" : "BonusSpeed", "effectLife":0, "effectDammage":0,"effectSpeedOwner":5, "effectSpeedBullet":0, "effectScore":0},
     {"bonusId":4, "type":"bulletBonus","name" : "MalusDammage", "effectLife":0, "effectDammage":-1, "effectSpeedOwner":0, "effectSpeedBullet":0, "effectScore":0},
-    {"bonusId":5, "type":"playerBonus","name" : "MalusSpeed", "effectLife":0, "effectDammage":0, "effectSpeedOwner":-0.2, "effectSpeedBullet":0, "effectScore":0}]
+    {"bonusId":5, "type":"playerBonus","name" : "MalusSpeed", "effectLife":0, "effectDammage":0, "effectSpeedOwner":-5, "effectSpeedBullet":0, "effectScore":0}]
 }
 
 },{}],5:[function(require,module,exports){
@@ -21283,7 +21283,11 @@ var Player = function () {
     }, {
         key: "ennemyTouched",
         value: function ennemyTouched(bullet) {
-            this.score += bullet.scoreIncrease;
+            if (bullet) {
+                this.score += bullet.scoreIncrease;
+            } else {
+                this.score += 1;
+            }
         }
     }, {
         key: "isDead",
