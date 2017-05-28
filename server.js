@@ -59,7 +59,7 @@ function gameLoop(){
     game.removeDead();
     game.refreshBonusList();
 }
-setInterval(gameLoop, 0.09);
+setInterval(gameLoop, 1000/20);
 
 
 server.listen(8080 , function(){

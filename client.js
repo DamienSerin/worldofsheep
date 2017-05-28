@@ -51,13 +51,13 @@ let pseudo;
 
 function initImg(){
     let dir = ["up", "down", "left", "right"];
-    
+
     for (var iter = 1; iter < 6; iter++) {
         for (let d of dir){
             avatars.push(document.getElementById('avatar'+iter+d));
         }
     }
-    
+
     for (let bon of config.bonus){
         bonusimg.push(document.getElementById(bon.name));
     }
@@ -72,8 +72,8 @@ socket.on('playerInit', function(args){
     let tmp = JSON.parse(args.map);
     map.walls = tmp.walls;
     map.spawns = tmp.spawns;
-    
-   
+
+
   pseudo = prompt("Veuillez saisir votre pseudo pour jouer:","Bob");
    if(pseudo!=null && pseudo!="Bob"){
       console.log("nom different");
@@ -118,13 +118,13 @@ function death(){
 
 function isHUDDirty(){
     let dirty = false;
-    
+
     /* first iteration*/
     if (!oldplayers) return true;
-    
+
     if (players) {
         if (players.length != oldplayers.length) return true;
-        
+
         for(let player of players){
             let oldplayer = _.findWhere(oldplayers, {id: player.id});
             if (!oldplayer) return true;
@@ -133,34 +133,34 @@ function isHUDDirty(){
             if (player.lifepoints != oldplayers.lifepoints) return true;
         }
     }
-    
+
     if (!oldbonus) return true;
-    
+
     if (mybonus){
         if (mybonus.length != oldbonus.length) return true;
-        
+
         for (let b of mybonus){
             let oldb = _.findWhere(oldbonus, {id: oldb.id});
             if (!oldb) return true;
         }
     }
 
-    
+
     return dirty;
 }
 
 function updateHUD(){
     let dirty = false;
-    
+
     dirty = isHUDDirty();
-    
+
     if (dirty){
         let y = 5;
         let x = 0;
         players = _.sortBy(players,'score');
         ctxhud.clearRect(0,0,canvasHUD.width, canvasHUD.height);
-        
-       
+
+
         //x,y
         renderer.drawImg(ctxhud,0,5,20,20,lifeimg);
         renderer.drawText(ctxhud, 24,20, _.findWhere(players, {id: myPlayerId}).lifepoints);
@@ -187,7 +187,7 @@ function updateHUD(){
             y+=25;
             renderer.drawText(ctxhud,0,y,text);
         }
-        
+
     }
 }
 
@@ -209,14 +209,14 @@ function renderWorld(){
     for(let bullet of bullets){
         map.drawBullet(ctxfg, bullet, bulletimg1);
     }
-    
+
     for(let b of bonus){
         // && engine.isTimeout(b.timeBeginMap, b.duration)
         if(b.idOwner == 0){
             map.drawBonus(ctxfg, b, _.findWhere(bonusimg, {id:b.name}));
         }
     }
-    
+
     updateHUD();
 }
 
@@ -293,4 +293,3 @@ $(document).on('mousedown', function(event){
             break;
     }
 });
-

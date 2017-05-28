@@ -5,7 +5,7 @@ class Player {
         this.state = "alive";
         this.score = 0;
         this.lifepoints = 10;
-        this.speed = 0.5;
+        this.speed = 15;
         this.x = 0;
         this.y = 0;
         this.dirX = 0;
@@ -16,11 +16,11 @@ class Player {
         this.avatar = "avatar" + Math.floor((Math.random() * 5) + 1);
         this.bonus = false;
     }
-    
+
     setPseudo(pseudo){
       this.pseudo = pseudo;
     }
-    
+
 
     getTouched(bullet){
         this.lifepoints -= bullet.dammage;
@@ -33,7 +33,7 @@ class Player {
     isDead(){
         return this.lifepoints <= 0;
     }
-    
+
     setBonus(bool){
         this.bonus = bool;
     }

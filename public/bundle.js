@@ -123,7 +123,7 @@ var Bullet = function () {
 
 		this.idOwner = idOwner;
 		this.dammage = 1;
-		this.speed = 0.8;
+		this.speed = 18;
 		this.scoreIncrease = 1;
 		this.x = x;
 		this.y = y;
@@ -21258,7 +21258,7 @@ var Player = function () {
         this.state = "alive";
         this.score = 0;
         this.lifepoints = 10;
-        this.speed = 0.5;
+        this.speed = 15;
         this.x = 0;
         this.y = 0;
         this.dirX = 0;
