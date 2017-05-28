@@ -45,8 +45,10 @@ let pseudo;
 function initImg(){
     let dir = ["up", "down", "left", "right"];
     
-    for (let d of dir){
-        avatars.push(document.getElementById('avatar1'+d));
+    for (var iter = 1; iter < 6; iter++) {
+        for (let d of dir){
+            avatars.push(document.getElementById('avatar'+iter+d));
+        }
     }
     
     //avatars.push(document.getElementById('avatar1down'));
@@ -161,8 +163,7 @@ function updateHUD(){
 }
 
 function getAvatarDirection(player){
-    console.log('avatar1' + player.direction);
-    return 'avatar1' + player.direction;
+    return player.avatar + player.direction;
 }
 
 function renderWorld(){

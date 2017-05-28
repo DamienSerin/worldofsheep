@@ -13,6 +13,7 @@ class Player {
         this.direction = "down";
         this.width = 24;
         this.height = 30;
+        this.avatar = "avatar" + Math.floor((Math.random() * 5) + 1);
         //this.bonus = new Bonus();
         //this.malus = new Malus();
     }

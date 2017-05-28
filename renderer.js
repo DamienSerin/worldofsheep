@@ -13,7 +13,6 @@
     
     function drawText(ctx, x,y,text, color){
       color = color ? color : "black";
-      //font = font ? font: "12px Arial";
       ctx.fillStyle = color;
       //ctx.textAlign = "center";
       //ctx.font = font;

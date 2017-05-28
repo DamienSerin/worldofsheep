@@ -111,33 +111,35 @@ var pseudo = void 0;
 function initImg() {
     var dir = ["up", "down", "left", "right"];
 
-    var _iteratorNormalCompletion = true;
-    var _didIteratorError = false;
-    var _iteratorError = undefined;
+    for (var iter = 1; iter < 6; iter++) {
+        var _iteratorNormalCompletion = true;
+        var _didIteratorError = false;
+        var _iteratorError = undefined;
 
-    try {
-        for (var _iterator = dir[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-            var d = _step.value;
-
-            avatars.push(document.getElementById('avatar1' + d));
-        }
-
-        //avatars.push(document.getElementById('avatar1down'));
-        // console.log(avatars[0].id);
-    } catch (err) {
-        _didIteratorError = true;
-        _iteratorError = err;
-    } finally {
         try {
-            if (!_iteratorNormalCompletion && _iterator.return) {
-                _iterator.return();
+            for (var _iterator = dir[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                var d = _step.value;
+
+                avatars.push(document.getElementById('avatar' + iter + d));
             }
+        } catch (err) {
+            _didIteratorError = true;
+            _iteratorError = err;
         } finally {
-            if (_didIteratorError) {
-                throw _iteratorError;
+            try {
+                if (!_iteratorNormalCompletion && _iterator.return) {
+                    _iterator.return();
+                }
+            } finally {
+                if (_didIteratorError) {
+                    throw _iteratorError;
+                }
             }
         }
     }
+
+    //avatars.push(document.getElementById('avatar1down'));
+    // console.log(avatars[0].id);
 }
 socket.on('playerInit', function (args) {
     initImg();
@@ -329,8 +331,7 @@ function updateHUD() {
 }
 
 function getAvatarDirection(player) {
-    console.log('avatar1' + player.direction);
-    return 'avatar1' + player.direction;
+    return player.avatar + player.direction;
 }
 
 function renderWorld() {
@@ -20813,6 +20814,7 @@ var Player = function () {
         this.direction = "down";
         this.width = 24;
         this.height = 30;
+        this.avatar = "avatar" + Math.floor(Math.random() * 5 + 1);
         //this.bonus = new Bonus();
         //this.malus = new Malus();
     }
@@ -20865,7 +20867,6 @@ function drawImg(canv, x, y, width, height, img) {
 
 function drawText(ctx, x, y, text, color) {
   color = color ? color : "black";
-  //font = font ? font: "12px Arial";
   ctx.fillStyle = color;
   //ctx.textAlign = "center";
   //ctx.font = font;
