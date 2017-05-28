@@ -70,6 +70,7 @@ class Game {
     }
 
     checkForHighScores(player){
+        if (!player) return;
         if (this.highscores.length <= 0){
             this.highscores.push({pseudo: player.pseudo, player: player.id, score: player.score});
         }

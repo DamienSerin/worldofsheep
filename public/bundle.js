@@ -94,7 +94,7 @@ tmp_canvas.height = 600;
 */
 
 var lifeimg = document.getElementById('lifepoints');
-var avatar = document.getElementById('avatar1down');
+//let avatar = document.getElementById('avatar1down');
 var bulletimg1 = document.getElementById('bullet1');
 
 var avatars = [];
@@ -137,10 +137,8 @@ function initImg() {
             }
         }
     }
-
-    //avatars.push(document.getElementById('avatar1down'));
-    // console.log(avatars[0].id);
 }
+
 socket.on('playerInit', function (args) {
     initImg();
     myPlayerId = args.id;
@@ -150,12 +148,11 @@ socket.on('playerInit', function (args) {
     map.walls = tmp.walls;
     map.spawns = tmp.spawns;
 
-    /* A TESTER AUTRE PART QUE SUR VM CACA 
-    pseudo = prompt("Veuillez saisir votre pseudo pour jouer:","Bob");
-    if(pseudo!=null && pseudo!="Bob"){
-       console.log("nom different");
-       socket.emit('setPseudo', {pseudo : pseudo});
-     }*/
+    pseudo = prompt("Veuillez saisir votre pseudo pour jouer:", "Bob");
+    if (pseudo != null && pseudo != "Bob") {
+        console.log("nom different");
+        socket.emit('setPseudo', { pseudo: pseudo });
+    }
 
     var _iteratorNormalCompletion2 = true;
     var _didIteratorError2 = false;
@@ -683,6 +680,7 @@ var Game = function () {
     }, {
         key: 'checkForHighScores',
         value: function checkForHighScores(player) {
+            if (!player) return;
             if (this.highscores.length <= 0) {
                 this.highscores.push({ pseudo: player.pseudo, player: player.id, score: player.score });
             }

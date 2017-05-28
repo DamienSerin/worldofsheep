@@ -32,8 +32,7 @@ class Map{
         }
     }
 
-  
-    
+
 
     drawBullet(canv, bullet, img){
         renderer.drawImg(canv, bullet.x,bullet.y,bullet.width, bullet.height, img);

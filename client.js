@@ -28,7 +28,7 @@ tmp_canvas.height = 600;
 */
 
 let lifeimg = document.getElementById('lifepoints');
-let avatar = document.getElementById('avatar1down');
+//let avatar = document.getElementById('avatar1down');
 let bulletimg1 = document.getElementById('bullet1');
 
 let avatars = [];
@@ -42,6 +42,7 @@ let map = new Map();
 let highscores = null;
 let pseudo;
 
+
 function initImg(){
     let dir = ["up", "down", "left", "right"];
     
@@ -50,10 +51,9 @@ function initImg(){
             avatars.push(document.getElementById('avatar'+iter+d));
         }
     }
-    
-    //avatars.push(document.getElementById('avatar1down'));
-   // console.log(avatars[0].id);
 }
+
+
 socket.on('playerInit', function(args){
     initImg();
     myPlayerId = args.id;
@@ -63,12 +63,12 @@ socket.on('playerInit', function(args){
     map.walls = tmp.walls;
     map.spawns = tmp.spawns;
     
-   /* A TESTER AUTRE PART QUE SUR VM CACA 
-   pseudo = prompt("Veuillez saisir votre pseudo pour jouer:","Bob");
+   
+  pseudo = prompt("Veuillez saisir votre pseudo pour jouer:","Bob");
    if(pseudo!=null && pseudo!="Bob"){
       console.log("nom different");
       socket.emit('setPseudo', {pseudo : pseudo});
-    }*/
+    }
 
     for(let wall of map.walls){
         map.drawWall(ctxbg, wall);
